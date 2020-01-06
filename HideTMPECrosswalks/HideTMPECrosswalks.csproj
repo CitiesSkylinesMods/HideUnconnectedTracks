@@ -69,6 +69,7 @@
     <Compile Include="KianMod.cs" />
     <Compile Include="NodeInfoExt.cs" />
     <Compile Include="Patches\LoadingWrapperPatch.cs" />
+    <Compile Include="Patches\NetNode_RenderInstance.cs" />
     <Compile Include="Patches\TranspilerUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\Options.cs" />
