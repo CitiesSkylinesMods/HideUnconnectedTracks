@@ -7,6 +7,13 @@ using System;
 namespace HideTMPECrosswalks.Utils {
 
     public static class Extensions {
+        public static void CopyProperties(object target, object origin) {
+            FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public);
+            foreach (FieldInfo fieldInfo in fields) {
+                fieldInfo.SetValue(target, fieldInfo.GetValue(origin));
+            }
+        }
+
         internal static ref NetNode ToNode(this ushort id) => ref Singleton<NetManager>.instance.m_nodes.m_buffer[id];
         internal static ref NetSegment ToSegment(this ushort id) => ref Singleton<NetManager>.instance.m_segments.m_buffer[id];
         //internal static NetLane ToLane(this int id) => Singleton<NetManager>.instance.m_lanes.m_buffer[id];

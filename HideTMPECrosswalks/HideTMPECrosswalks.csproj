@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KianMod.cs" />
+    <Compile Include="NodeInfoExt.cs" />
     <Compile Include="Patches\LoadingWrapperPatch.cs" />
     <Compile Include="Patches\NetNodeDetours.cs" />
     <Compile Include="Patches\TranspilerUtils.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Utils\DumpUtils.cs" />
     <Compile Include="Utils\ColorUtils.cs" />
     <Compile Include="Utils\Extensions.cs" />
+    <Compile Include="Utils\MaterialUtils.cs" />
     <Compile Include="Utils\PrefabUtils.cs" />
     <Compile Include="Utils\TextureUTILS.cs" />
     <Compile Include="Utils\TMPEUtils.cs" />

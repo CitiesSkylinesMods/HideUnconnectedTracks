@@ -4,10 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO:
-//  - fix asym elevated <-----
-
 namespace HideTMPECrosswalks.Utils {
+    using ColossalFramework;
     using Patches;
     using Settings;
     using static TextureUtils;
@@ -129,61 +127,60 @@ namespace HideTMPECrosswalks.Utils {
             }
         }
 
-
         public static Hashtable MaterialCache = null;
         public static Hashtable TextureCache = null;
         public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
 
-        public static void CachePrefabs() {
-            if (MaterialCache == null) {
-                MaterialCache = new Hashtable(100);
-            }
-            if (TextureCache == null) {
-                TextureCache = new Hashtable(100);
-            }
+        //public static void CachePrefabs() {
+        //    if (MaterialCache == null) {
+        //        MaterialCache = new Hashtable(100);
+        //    }
+        //    if (TextureCache == null) {
+        //        TextureCache = new Hashtable(100);
+        //    }
 
-            for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
-                foreach (bool bStartNode in new bool[] { false, true }) {
-                    if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
-                        NetSegment segment = segmentID.ToSegment();
-                        ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
-                        foreach (var node in segment.Info.m_nodes) {
-                            //cache:
-                            Extensions.Log("Caching " + segment.Info.name);
-                            NetNode_RenderInstance.CalculateMaterial(node.m_nodeMaterial, nodeID, segmentID);
-                        }
-                    }
-                }
-            }
-            Extensions.Log("all prefabs cached");
-        }
+        //    for (ushort segmentID = 0; segmentID < NetManager.MAX_SEGMENT_COUNT; ++segmentID) {
+        //        foreach (bool bStartNode in new bool[] { false, true }) {
+        //            if (TMPEUTILS.HasCrossingBan(segmentID, bStartNode)) {
+        //                NetSegment segment = segmentID.ToSegment();
+        //                ushort nodeID = bStartNode ? segment.m_startNode : segment.m_endNode;
+        //                foreach (var node in segment.Info.m_nodes) {
+        //                    //cache:
+        //                    Extensions.Log("Caching " + segment.Info.name);
+        //                    NetNode_RenderInstance.CalculateMaterial(node.m_nodeMaterial, nodeID, segmentID);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    Extensions.Log("all prefabs cached");
+        //}
 
-        public static void ClearALLCache() {
-            //MaterialCache = null;
-            //TextureCache = null;
-            Always_Table = Never_Table = null;
-            Extensions.Log("cache cleared");
-        }
+        //public static void ClearALLCache() {
+        //    //MaterialCache = null;
+        //    //TextureCache = null;
+        //    Always_Table = Never_Table = null;
+        //    Extensions.Log("cache cleared");
+        //}
 
-        public static NetInfo GetGroundInfo(this NetInfo info) {
-            if (info.m_netAI is RoadAI)
-                return info;
-            int n = PrefabCollection<NetInfo>.LoadedCount();
-            for (uint i = 0; i < n; ++i) {
-                NetInfo info2 = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (IsNormalGroundRoad(info2)) {
-                    RoadAI ai = info2.m_netAI as RoadAI;
-                    bool b;
-                    b = ai.m_elevatedInfo == info;
-                    b |= ai.m_bridgeInfo == info;
-                    b |= ai.m_tunnelInfo == info;
-                    b |= ai.m_slopeInfo == info;
-                    if (b)
-                        return info2;
-                }
-            }
-            return null;//in case of failure.
-        }
+        //public static NetInfo GetGroundInfo(this NetInfo info) {
+        //    if (info.m_netAI is RoadAI)
+        //        return info;
+        //    int n = PrefabCollection<NetInfo>.LoadedCount();
+        //    for (uint i = 0; i < n; ++i) {
+        //        NetInfo info2 = PrefabCollection<NetInfo>.GetLoaded(i);
+        //        if (IsNormalGroundRoad(info2)) {
+        //            RoadAI ai = info2.m_netAI as RoadAI;
+        //            bool b;
+        //            b = ai.m_elevatedInfo == info;
+        //            b |= ai.m_bridgeInfo == info;
+        //            b |= ai.m_tunnelInfo == info;
+        //            b |= ai.m_slopeInfo == info;
+        //            if (b)
+        //                return info2;
+        //        }
+        //    }
+        //    return null;//in case of failure.
+        //}
 
         public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
         public static bool isOneWay(this NetInfo info) => info.m_forwardVehicleLaneCount == 0 ||  info.m_backwardVehicleLaneCount == 0;
@@ -235,94 +232,30 @@ namespace HideTMPECrosswalks.Utils {
 
         }
 
-
-
-        public static Material HideCrossing(Material material, NetInfo info) {
-            try {
-                if (MaterialCache == null) {
-                    return material; // exiting game.
+        public static void CreateNoZebraTextures() {
+            int count = PrefabCollection<NetInfo>.LoadedCount();
+            for (uint i = 0; i < count; ++i) {
+                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                if (IsNormalGroundRoad(info) && CanHideCrossing(info)) {
+                    NodeInfoExt.CreateNoZebra(info);
                 }
-                if (MaterialCache.Contains(material)) {
-                    return (Material)MaterialCache[material];
-                }
-                if (HasSameNodeAndSegmentTextures(info, ID_Defuse)) {
-                    // TODO why this works but the WierdNodeTest() fails.
-                    string m = $"{info.name} is {info.category} is without proper node texture.";
-                    Extensions.Log(m);
-                    MaterialCache[material] = material;
-                    return material;
-                }
-
-                var ticks = System.Diagnostics.Stopwatch.StartNew();
-                Material ret = new Material(material);
-                HideCrossing2(ret, info);
-                MaterialCache[material] = ret;
-                Extensions.Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
-                return ret;
             }
-            catch (Exception e) {
-                Extensions.Log(e.ToString());
-                MaterialCache[material] = material; // do not repeat the same mistake!
-                return material;
-            }
+            Singleton<NetManager>.instance.RebuildLods();
         }
 
-        public static void HideCrossing2(Material material, NetInfo info) {
-            bool dump = false;
-#if DEBUG
-            //dump = true;
-#endif
+        public static bool CanHideCrossing(NetInfo info) {
+            bool ret = info.m_netAI is RoadBaseAI;
+            ret &= info.m_hasPedestrianLanes;
+            ret &= info.GetUncheckedLocalizedTitle() == "Four-Lane Road";
+            return ret;
 
-            if (dump) DumpUtils.Dump(info);
+            //TODO optimize
+            //bool never = PrefabUtils.NeverZebra(info);
+            //bool always = PrefabUtils.AlwaysZebra(info);
+            //ret |= always;
+            //ret &= !never;
+        }
 
-            Texture tex = material.GetTexture(ID_Defuse);
-            if (tex != null) {
-                if (TextureCache.Contains(tex)) {
-                    tex = TextureCache[tex] as Texture;
-                    Extensions.Log("Texture cache hit: " + tex.name);
-                } else {
-                    tex = Process(tex, Crop);
-                    (tex as Texture2D).Compress(false);
-                    TextureCache[tex] = tex;
-                }
-                material.SetTexture(ID_Defuse, tex);
-                if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_Defuse, "node-processed", info));
-            }
 
-            string[] exempt_categories = {
-                    //"RoadsTiny",
-                    "RoadsSmall",
-                    //"RoadsSmallHV",
-                };
-            if (!exempt_categories.Contains(info.category)) {
-                tex = material.GetTexture(ID_APRMap);
-                if (tex != null) {
-                    if (TextureCache.Contains(tex)) {
-                        tex = TextureCache[tex] as Texture;
-                        Extensions.Log("Texture cache hit: " + tex.name);
-                    } else {
-                        tex = Process(tex, Crop);
-                        Material material2 = info.m_segments[0]?.m_material;
-                        Texture tex2 = material2?.GetTexture(ID_APRMap);
-                        if (tex2 != null) {
-                            if (info.m_netAI is RoadAI) {
-                                if (info.isAsym()) tex2 = Process(tex2, Mirror);
-                                float ratio = info.ScaleRatio();
-                                if (ratio != 1f) {
-                                    Texture2D ScaleRatio(Texture2D t) => Scale(t, ratio);
-                                    tex2 = Process(tex2, ScaleRatio);
-                                }
-                                if (dump) DumpUtils.Dump(tex2, DumpUtils.GetFilePath(ID_APRMap, "segment-processed", info));
-                            }
-                            tex = Process(tex, tex2, MeldDiff);
-                            if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_APRMap, "node-processed", info));
-                        }
-                        (tex as Texture2D).Compress(false); //TODO make un-readable?
-                        TextureCache[tex] = tex;
-                    }
-                    material.SetTexture(ID_APRMap, tex);
-                } // end if cache
-            } // end if tex
-        } // end if !exempt
     } // end class
 } // end namespace
