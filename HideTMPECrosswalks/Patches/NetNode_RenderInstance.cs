@@ -38,7 +38,6 @@ namespace HideTMPECrosswalks.Patches {
             return NodeInfoExt.CheckFlags2(node, flags, hideCrossings);
         }
 
-
         static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);
 
         //static bool Prefix(ushort nodeID) {
@@ -58,25 +57,6 @@ namespace HideTMPECrosswalks.Patches {
         }
 
         #region Transpiler
-        /* public static void DrawMesh(
-                  Mesh mesh,
-                  Vector3 position,
-                  Quaternion rotation,
-                  Material material,
-                  int layer,
-                  Camera camera,
-                  int submeshIndex,
-                  MaterialPropertyBlock properties);
-                  */
-        static Type[] args = new[] {
-                typeof(Mesh),
-                typeof(Vector3),
-                typeof(Quaternion),
-                typeof(Material),
-                typeof(int),
-                typeof(Camera),
-                typeof(int),
-                typeof(MaterialPropertyBlock) };
         static MethodInfo mCheckFlags2 => typeof(NetNode_RenderInstance).GetMethod("CheckFlags");
         static MethodInfo mCheckFlags => typeof(NetInfo.Node).GetMethod("CheckFlags");
 
