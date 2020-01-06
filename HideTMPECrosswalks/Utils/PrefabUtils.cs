@@ -229,7 +229,6 @@ namespace HideTMPECrosswalks.Utils {
                 }
             }
             return false;
-
         }
 
         public static void CreateNoZebraTextures() {
