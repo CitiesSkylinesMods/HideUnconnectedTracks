@@ -1,14 +1,9 @@
-
-using System.Diagnostics;
-using System.IO;
-using System.Threading;
 using System;
-using System.Linq;
-
 using UnityEngine;
+using System.Collections;
 
 namespace HideTMPECrosswalks.Utils {
-    using static HideTMPECrosswalks.Utils.ColorUtils;
+    using static ColorUtils;
     public static class TextureUtils {
         public delegate Texture2D TProcessor(Texture2D tex);
         public delegate Texture2D TProcessor2(Texture2D tex, Texture2D tex2);
@@ -22,6 +17,10 @@ namespace HideTMPECrosswalks.Utils {
             throw new Exception("Bad Texture ID");
         }
         internal static int[] texIDs => new int[]{ID_Defuse, ID_APRMap,ID_XYSMap };
+
+        public static Hashtable TextureCache = null;
+        public static void Init() => TextureCache = new Hashtable(500);
+        public static void Clear() => TextureCache = null;
 
         public static Texture2D GetReadableTexture(this Material material, int id) {
             Texture2D texture = material.GetTexture(id) as Texture2D;

@@ -5,12 +5,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Text.RegularExpressions;
 
+//TODO check out material.MainTextureScale
+//regarding weird nodes, what if we return a copy of the material?
+
 namespace HideTMPECrosswalks.Utils {
     using static PrefabUtils;
     using static TextureUtils;
 
     public static class MaterialUtils {
-        public static Material HideCrossing(Material material, NetInfo info) {
+
+        public static string[] APRMapExceptions = new[] { "" }; // TODO complete list.
+
+
+        public static Hashtable MaterialCache = null;
+        public static void Init() => MaterialCache = new Hashtable(500);
+        public static void Clear() => MaterialCache = null;
+
+        public static Material HideCrossingCached(Material material, NetInfo info) {
             try {
                 if (MaterialCache == null) {
                     return material; // exiting game.
@@ -28,7 +39,7 @@ namespace HideTMPECrosswalks.Utils {
 
                 var ticks = System.Diagnostics.Stopwatch.StartNew();
                 Material ret = new Material(material);
-                HideCrossing2(ret, info);
+                HideCrossings(ret, info);
                 MaterialCache[material] = ret;
                 Extensions.Log($"Cached new texture for {info.name} ticks=" + ticks.ElapsedTicks.ToString("E2"));
                 return ret;
@@ -40,13 +51,21 @@ namespace HideTMPECrosswalks.Utils {
             }
         }
 
-        public static void HideCrossing2(Material material, NetInfo info) {
+        static void P(string s) => Extensions.Log("Point " + s);
+
+        public static void HideCrossings(Material material, NetInfo info) {
+            if (material == null) throw new ArgumentNullException("material");
+            if (info == null) throw new ArgumentNullException("info");
             bool dump = false;
 #if DEBUG
             //dump = true;
 #endif
 
-            if (dump) DumpUtils.Dump(info);
+            if (dump) {
+                DumpUtils.Dump(info);
+                //DumpUtils.Dump(material, "node-original", info);
+            }
+
 
             Texture tex = material.GetTexture(ID_Defuse);
             if (tex != null) {
@@ -54,10 +73,12 @@ namespace HideTMPECrosswalks.Utils {
                     tex = TextureCache[tex] as Texture;
                     Extensions.Log("Texture cache hit: " + tex.name);
                 } else {
+                    Extensions.Log("POINT A tex = " + tex.name);
                     tex = Process(tex, Crop);
-                    (tex as Texture2D).Compress(false);
+                    (tex as Texture2D).Compress(true);
                     TextureCache[tex] = tex;
                 }
+
                 material.SetTexture(ID_Defuse, tex);
                 if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_Defuse, "node-processed", info));
             }
@@ -69,6 +90,7 @@ namespace HideTMPECrosswalks.Utils {
                 };
             if (!exempt_categories.Contains(info.category)) {
                 tex = material.GetTexture(ID_APRMap);
+                Extensions.Log("POINT B: tex.width=" + tex.width);
                 if (tex != null) {
                     if (TextureCache.Contains(tex)) {
                         tex = TextureCache[tex] as Texture;
@@ -77,6 +99,7 @@ namespace HideTMPECrosswalks.Utils {
                         tex = Process(tex, Crop);
                         Material material2 = info.m_segments[0]?.m_material;
                         Texture tex2 = material2?.GetTexture(ID_APRMap);
+                        Texture tex2_orig = tex2;
                         if (tex2 != null) {
                             if (info.m_netAI is RoadAI) {
                                 if (info.isAsym()) tex2 = Process(tex2, Mirror);
@@ -85,12 +108,13 @@ namespace HideTMPECrosswalks.Utils {
                                     Texture2D ScaleRatio(Texture2D t) => Scale(t, ratio);
                                     tex2 = Process(tex2, ScaleRatio);
                                 }
-                                if (dump) DumpUtils.Dump(tex2, DumpUtils.GetFilePath(ID_APRMap, "segment-processed", info));
+                                if(tex2 != tex2_orig && dump)
+                                    DumpUtils.Dump(tex2, DumpUtils.GetFilePath(ID_APRMap, "segment-processed", info));
                             }
                             tex = Process(tex, tex2, MeldDiff);
                             if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_APRMap, "node-processed", info));
                         }
-                        (tex as Texture2D).Compress(false); //TODO make un-readable?
+                        (tex as Texture2D).Compress(true); //TODO make un-readable?
                         TextureCache[tex] = tex;
                     }
                     material.SetTexture(ID_APRMap, tex);

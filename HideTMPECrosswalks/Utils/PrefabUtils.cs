@@ -49,9 +49,6 @@ namespace HideTMPECrosswalks.Utils {
             return name;
         }
 
-
-
-
         public static string[] GetRoadNames() {
             List<string> ret = new List<string>();
             for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
@@ -127,9 +124,7 @@ namespace HideTMPECrosswalks.Utils {
             }
         }
 
-        public static Hashtable MaterialCache = null;
-        public static Hashtable TextureCache = null;
-        public static string[] ARPMapExceptions = new[] { "" }; // TODO complete list.
+
 
         //public static void CachePrefabs() {
         //    if (MaterialCache == null) {
@@ -232,20 +227,34 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static void CreateNoZebraTextures() {
+            TextureUtils.Init();
             int count = PrefabCollection<NetInfo>.LoadedCount();
             for (uint i = 0; i < count; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                 if (IsNormalGroundRoad(info) && CanHideCrossing(info)) {
-                    NodeInfoExt.CreateNoZebra(info);
+                    if (info.GetUncheckedLocalizedTitle() == "Four-Lane Road") {
+                        NodeInfoExt.RemoveNoZebraTexture(info);
+                        NodeInfoExt.CreateNoZebraTexture(info);
+                    }
                 }
             }
             Singleton<NetManager>.instance.RebuildLods();
         }
 
+        public static void RemoveNoZebraTextures() {
+            int count = PrefabCollection<NetInfo>.LoadedCount();
+            for (uint i = 0; i < count; ++i) {
+                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                if (IsNormalGroundRoad(info) && CanHideCrossing(info)) {
+                    //if (info.GetUncheckedLocalizedTitle() == "Four-Lane Road")
+                        NodeInfoExt.RemoveNoZebraTexture(info);
+                }
+            }
+        }
         public static bool CanHideCrossing(NetInfo info) {
             bool ret = info.m_netAI is RoadBaseAI;
             ret &= info.m_hasPedestrianLanes;
-            ret &= info.GetUncheckedLocalizedTitle() == "Four-Lane Road";
+            //ret &= info.GetUncheckedLocalizedTitle() == "Four-Lane Road";
             return ret;
 
             //TODO optimize

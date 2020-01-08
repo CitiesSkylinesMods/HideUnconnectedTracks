@@ -8,9 +8,14 @@ namespace HideTMPECrosswalks.Utils {
 
     public static class Extensions {
         public static void CopyProperties(object target, object origin) {
-            FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public);
+            FieldInfo[] fields = origin.GetType().GetFields();
             foreach (FieldInfo fieldInfo in fields) {
-                fieldInfo.SetValue(target, fieldInfo.GetValue(origin));
+                //Extensions.Log($"Copying field:<{fieldInfo.Name}> ...>");
+                object value = fieldInfo.GetValue(origin);
+                string strValue = value?.ToString() ?? "null";
+                //Extensions.Log($"Got field value:<{strValue}> ...>");
+                fieldInfo.SetValue(target, value);
+                //Extensions.Log($"Copied field:<{fieldInfo.Name}> value:<{strValue}>");
             }
         }
 

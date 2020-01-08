@@ -43,7 +43,7 @@ namespace HideTMPECrosswalks.Utils {
                 string baseName = "segment";
                 //if (info.m_segments.Length > 1) baseName += i;
                 Dump(material, baseName, info);
-                break; //first one is enough
+                //break; //first one is enough
             }
             for (int i = 0; i < info.m_nodes.Length; ++i) {
                 var node = info.m_nodes[i];
@@ -51,7 +51,7 @@ namespace HideTMPECrosswalks.Utils {
                 string baseName = "node";
                 if (info.m_nodes.Length > 1) baseName += i;
                 Dump(material, baseName, info);
-                break; //first one is enough
+                //break; //first one is enough
             }
         }
 
@@ -72,7 +72,7 @@ namespace HideTMPECrosswalks.Utils {
 
         public static void Dump(Texture tex, string path) {
             Texture2D texture = tex.TryMakeReadable();
-            Extensions.Log($"Dumping texture " + texture.name);
+            Extensions.Log($"Dumping texture:<{texture.name}> size:<{texture.width}x{texture.height}>");
             byte[] bytes = texture.EncodeToPNG();
             Extensions.Log("Dumping to " + path);
             File.WriteAllBytes(path, bytes);

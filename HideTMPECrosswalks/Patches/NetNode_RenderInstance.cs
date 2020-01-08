@@ -19,6 +19,7 @@ namespace HideTMPECrosswalks.Patches {
             bool ret = PrefabUtils.CanHideCrossing(info);
 #if DEBUG
             if (Extensions.currentMode == AppMode.AssetEditor) {
+                //Extensions.Log($"Should hide crossings: {ret} | stack:\n" + System.Environment.StackTrace);
                 return ret; // always hide crossings in asset editor for quick testing.
             }
 #endif
@@ -35,7 +36,10 @@ namespace HideTMPECrosswalks.Patches {
 
         public static bool CheckFlags(NetInfo.Node node, NetNode.Flags flags, ushort nodeID, ushort segmentID) {
             bool hideCrossings = ShouldHideCrossing(nodeID, segmentID);
-            return NodeInfoExt.CheckFlags2(node, flags, hideCrossings);
+            bool ret = NodeInfoExt.CheckFlags2(node, flags, hideCrossings);
+            //Extensions.Log($"flags={flags} | ShouldHideCrossings={hideCrossings}  node is NodeInfoExt={node is NodeInfoExt} ret={ret}\n"
+            //    + Environment.StackTrace);
+            return ret;
         }
 
         static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);

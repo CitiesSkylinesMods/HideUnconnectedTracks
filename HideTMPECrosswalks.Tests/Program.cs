@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEngine;
 namespace HideTMPECrosswalks.Tests
 {
@@ -30,13 +31,14 @@ namespace HideTMPECrosswalks.Tests
         }
 
         static void Test() {
-            A a1 = new A { i = 5 };
-            A a2 = new A { i = 5 };
-            Assert(a1 == a2, "a1==a2");
+            A a = new A();
+            A a2 = null;
+            Log($"{!a} {!a2}");
+
         }
 
-        class A {
-            public int i;
+        class A : Object{
+            public A a =null;
         }
     }
 

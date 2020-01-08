@@ -143,7 +143,7 @@ namespace HideTMPECrosswalks {
             string path = DumpUtils.GetFilePath(ID_APRMap, s, info);
             DumpUtils.Dump(tex, path);
 
-            material = PrefabUtils.HideCrossing(material, info);
+            material = MaterialUtils.HideCrossingCached(material, info);
             DumpUtils.Dump(material, ID_APRMap, baseName: "node-processed ", info);
         }
     }
