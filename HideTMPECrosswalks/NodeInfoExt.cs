@@ -10,7 +10,7 @@ using System.Reflection;
 namespace HideTMPECrosswalks {
     using Utils;
 
-    //[Serializable]
+    // [Serializable]
     public class NodeInfoExt : NetInfo.Node {
         public bool bHideCrossings;
         public NetInfo netInfo;
@@ -51,7 +51,7 @@ namespace HideTMPECrosswalks {
             Extensions.Log($"Before len={info.m_nodes.Length}\n" + Environment.StackTrace);
             NetInfo.Node template = null;
             foreach (var node in info.m_nodes) {
-                if (node.CheckFlags(NetNode.Flags.Junction)) {
+                if (node.CheckFlags(NetNode.Flags.Junction) && node.m_connectGroup == 0) {
                     if (template != null)
                         throw new NotImplementedException("Why are there two junction nodes");
                     template = node;

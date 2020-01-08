@@ -10,6 +10,12 @@ namespace HideTMPECrosswalks.Patches {
             Extensions.Log("TRANSPILER " + message);
         }
 
+        public static List<CodeInstruction> ToCodeList(IEnumerable<CodeInstruction> instructions) {
+            var originalCodes = new List<CodeInstruction>(instructions);
+            var codes = new List<CodeInstruction>(originalCodes);
+            return codes;
+        }
+
         public static bool IsSameInstruction(CodeInstruction a, CodeInstruction b, bool debug = false) {
             if (a.opcode == b.opcode) {
                 if (a.operand == b.operand) {
@@ -133,7 +139,8 @@ namespace HideTMPECrosswalks.Patches {
             Log("PEEK (RESULTING CODE):\n" + codes.GetRange(index - 4, 14).IL2STR());
 
         }
-        static void InsertInstructions(List<CodeInstruction> codes, CodeInstruction[] insertion, int index) {
+
+        public static void InsertInstructions(List<CodeInstruction> codes, CodeInstruction[] insertion, int index) {
             foreach (var code in insertion)
                 if (code == null)
                     throw new Exception("Bad Instructions:\n" + insertion.IL2STR());
