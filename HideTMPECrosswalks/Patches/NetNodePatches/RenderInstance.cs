@@ -4,16 +4,18 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 
-namespace HideTMPECrosswalks.Patches.NetNode {
+namespace HideTMPECrosswalks.Patches.NetNodePatches {
     using Utils;
 
     [HarmonyPatch()]
     public static class RenderInstance {
         static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);
+
+        // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
+        static MethodInfo Target => typeof(global::NetNode).GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
         static MethodBase TargetMethod() {
-            // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
-            var ret = typeof(global::NetNode).GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
-            Extensions.Assert(ret!=null, "did not manage to find original function to patch");
+            var ret = Target;
+            Extensions.Assert(ret != null, "did not manage to find original function to patch");
             Log("aquired method " + ret);
             return ret;
         }
@@ -22,7 +24,8 @@ namespace HideTMPECrosswalks.Patches.NetNode {
         public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
             try {
                 var codes = TranspilerUtils.ToCodeList(instructions);
-                CheckFlagsCommon.PatchCheckFlags(codes, 2, 13); // patch second draw mesh.
+                CheckFlagsCommon.PatchCheckFlags(codes, occurance: 2, nodeID_arg: 2, segmentID_loc: 13, Target);
+
                 Log("successfully patched NetNode.RenderInstance");
                 return codes;
             }catch(Exception e) {

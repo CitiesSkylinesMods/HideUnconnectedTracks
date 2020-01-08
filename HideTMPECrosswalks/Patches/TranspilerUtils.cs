@@ -4,6 +4,7 @@ using System.Reflection.Emit;
 using Harmony;
 
 namespace HideTMPECrosswalks.Patches {
+    using System.Reflection;
     using Utils;
     public static class TranspilerUtils {
         static void Log(object message) {
@@ -14,6 +15,24 @@ namespace HideTMPECrosswalks.Patches {
             var originalCodes = new List<CodeInstruction>(instructions);
             var codes = new List<CodeInstruction>(originalCodes);
             return codes;
+        }
+
+        public static CodeInstruction GetLDArg(MethodInfo method, string name) {
+            byte idx = (byte)(GetParameterLoc(method, name) + 1);
+            return new CodeInstruction(OpCodes.Ldarg_S, idx);
+        }
+
+        /// <summary>
+        /// Post condtion: add one to get argument location
+        /// </summary>
+        public static byte GetParameterLoc(MethodInfo method, string name) {
+            var parameters = method.GetParameters();
+            for (byte i = 0; i < parameters.Length; ++i) {
+                if (parameters[i].Name == name) {
+                    return i;
+                }
+            }
+            throw new Exception($"did not found parameter with name:<{name}>");
         }
 
         public static bool IsSameInstruction(CodeInstruction a, CodeInstruction b, bool debug = false) {

@@ -70,7 +70,9 @@
     <Compile Include="NodeInfoExt.cs" />
     <Compile Include="Patches\CheckFlagsCommon.cs" />
     <Compile Include="Patches\LoadingWrapperPatch.cs" />
-    <Compile Include="Patches\NetNode\RenderInstance.cs" />
+    <Compile Include="Patches\NetNodePatches\CalculateGroupData.cs" />
+    <Compile Include="Patches\NetNodePatches\PopulateGroupData.cs" />
+    <Compile Include="Patches\NetNodePatches\RenderInstance.cs" />
     <Compile Include="Patches\TranspilerUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\Options.cs" />

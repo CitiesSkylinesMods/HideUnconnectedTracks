@@ -71,6 +71,7 @@ namespace HideTMPECrosswalks {
                 HarmonyInstance.SELF_PATCHING = false;
                 harmony = HarmonyInstance.Create(HarmonyId);
                 harmony.PatchAll(GetType().Assembly);
+                Extensions.Log("HideTMPECrosswalks Patching Completed!", true);
             }
         }
 
