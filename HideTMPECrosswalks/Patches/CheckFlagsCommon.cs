@@ -30,6 +30,7 @@ namespace HideTMPECrosswalks.Patches {
         }
 
         public static bool CheckFlags(NetInfo.Node node, NetNode.Flags flags, ushort nodeID, ushort segmentID) {
+            Extensions.Log("CheckFlagsCommon.CheckFlags() stack=\n" + System.Environment.StackTrace); // TODO check backttrace for *groupdata
             bool hideCrossings = ShouldHideCrossing(nodeID, segmentID);
             bool ret = NodeInfoExt.CheckFlags2(node, flags, hideCrossings);
             //Extensions.Log($"flags={flags} | ShouldHideCrossings={hideCrossings}  node is NodeInfoExt={node is NodeInfoExt} ret={ret}\n"
