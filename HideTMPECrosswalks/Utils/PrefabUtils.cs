@@ -235,6 +235,7 @@ namespace HideTMPECrosswalks.Utils {
                     if (info.GetUncheckedLocalizedTitle() == "Four-Lane Road") {
                         NodeInfoExt.RemoveNoZebraTexture(info);
                         NodeInfoExt.CreateNoZebraTexture(info);
+                        //info.m_nodes = new NetInfo.Node[] { };// info.m_nodes[1] }; // TODO delete
                     }
                 }
             }

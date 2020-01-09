@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ICities;
 using UnityEngine;
-using ColossalFramework;
-using System.Reflection;
+
 
 namespace HideTMPECrosswalks {
     using Utils;
@@ -19,13 +14,22 @@ namespace HideTMPECrosswalks {
             this.netInfo = netInfo;
 
             Extensions.Assert(template.m_material != null, $"template m_material is null netInfo=<{netInfo?.name}>");
-            m_material = m_nodeMaterial = new Material(template.m_nodeMaterial);
+            m_nodeMaterial = new Material(template.m_nodeMaterial);
             m_lodMaterial = new Material(template.m_lodMaterial);
+            if (template.m_material == template.m_nodeMaterial) m_material = m_nodeMaterial;
+            else m_material = new Material(template.m_material);
+
+            m_nodeMesh = AssetEditorRoadUtils.CopyMesh(template.m_nodeMesh);
+            m_lodMesh = AssetEditorRoadUtils.CopyMesh(template.m_lodMesh);
+            if (template.m_mesh == template.m_nodeMesh) m_mesh = m_nodeMesh;
+            else m_mesh = AssetEditorRoadUtils.CopyMesh(template.m_nodeMesh);
         }
 
         public void HideCrossings() {
             MaterialUtils.HideCrossings(m_material, netInfo);
             MaterialUtils.HideCrossings(m_lodMaterial, netInfo);
+            if (m_material != m_nodeMaterial) MaterialUtils.HideCrossings(m_nodeMaterial, netInfo);
+
             bHideCrossings = true;
         }
 
@@ -38,8 +42,8 @@ namespace HideTMPECrosswalks {
 
         public static void RemoveNoZebraTexture(NetInfo info) {
             Extensions.Log($"Before len={info.m_nodes.Length}\n" + Environment.StackTrace);
-            for(int i = 0; i < info.m_nodes.Length; ++i) {
-                if(info.m_nodes[i] is NodeInfoExt) {
+            for (int i = 0; i < info.m_nodes.Length; ++i) {
+                if (info.m_nodes[i] is NodeInfoExt) {
                     RemoveNode(info, i);
                     --i;
                 }
@@ -69,9 +73,9 @@ namespace HideTMPECrosswalks {
             int n = info.m_nodes.Length;
             //Extensions.Log($"RemoveNode len={info.m_nodes.Length} idx={idx}"
             //    + Environment.StackTrace);
-            Extensions.Assert(idx < n, $"idx<n {idx}<{n}" );
-            NetInfo.Node[] nodes2 = new NetInfo.Node[n -1];
-            for (int i = 0, i2=0; i < n; ++i) {
+            Extensions.Assert(idx < n, $"idx<n {idx}<{n}");
+            NetInfo.Node[] nodes2 = new NetInfo.Node[n - 1];
+            for (int i = 0, i2 = 0; i < n; ++i) {
                 if (i != idx) {
                     nodes2[i2] = info.m_nodes[i];
                     i2++;
@@ -99,7 +103,7 @@ namespace HideTMPECrosswalks {
 
         public static bool CheckFlags2(NetInfo.Node node, bool hideCrossings) {
             bool b = node is NodeInfoExt && (node as NodeInfoExt).bHideCrossings;
-            bool ret =  b == hideCrossings;
+            bool ret = b == hideCrossings;
             //Extensions.Log($"ShouldHideCrossings={hideCrossings}  node is NodeInfoExt={node is NodeInfoExt} bHideCrossings={b} ret={ret}\nstack:"
             //    + Environment.StackTrace);
             return ret;
