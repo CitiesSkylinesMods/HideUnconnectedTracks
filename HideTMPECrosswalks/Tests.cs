@@ -1,10 +1,11 @@
 #if DEBUG
 using ICities;
 using UnityEngine;
-using HideTMPECrosswalks.Utils;
+using ColossalFramework;
 
 namespace HideTMPECrosswalks {
-    using static TextureUtils;
+    using Utils;
+    using static Utils.TextureUtils;
 
     public class TestOnLoad : LoadingExtensionBase {
         public override void OnCreated(ILoading loading) { base.OnCreated(loading); Test(); }
@@ -14,13 +15,13 @@ namespace HideTMPECrosswalks {
             if (!Extensions.InGame && !Extensions.InAssetEditor)
                 return;
 
-            //Extensions.Log("Testing ...");
+            Extensions.Log("Testing ...");
             ////DebugTests.NameTest();
             ////DebugTests.Dumps();
             ////DebugTests.WierdNodeTest();
             //DebugTests.UVTest();
-
-            //Extensions.Log("Testing Done!");
+            DebugTests.ChangeTextures();
+            Extensions.Log("Testing Done!");
         }
 
     }
@@ -28,6 +29,49 @@ namespace HideTMPECrosswalks {
     public static class DebugTests {
         public static string R6L => "Six-Lane Road";
         public static string R4L => "Four-Lane Road";
+
+        public static void ChangeTextures() {
+            int count = PrefabCollection<NetInfo>.LoadedCount();
+            for (uint i = 0; i < count; ++i) {
+                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
+                if (info.IsNormalGroundRoad()) {
+                    if (info.GetUncheckedLocalizedTitle() == "Four-Lane Road") {
+                        // - Copy node DONE!
+                        // - unserializable extension Node: DONE!.
+                        var node = new NodeExt();
+                        var node0 = info.m_nodes[0];
+                        Extensions.CopyProperties(node, node0);
+
+                        // - new material DONE!
+                        // - copy material DONE!
+                        node.m_material = AssetEditorRoadUtils.CopyMaterial(node0.m_material);
+                        node.m_lodMaterial = AssetEditorRoadUtils.CopyMaterial(node0.m_lodMaterial);
+                        if (node0.m_nodeMaterial != node0.m_material) node.m_nodeMaterial = AssetEditorRoadUtils.CopyMaterial(node0.m_nodeMaterial);
+
+                        // - copy mesh DONE!
+                        node.m_mesh = AssetEditorRoadUtils.CopyMesh(node0.m_mesh);
+                        node.m_lodMesh = AssetEditorRoadUtils.CopyMesh(node0.m_lodMesh);
+                        if (node0.m_nodeMesh != node0.m_mesh) node.m_nodeMesh = AssetEditorRoadUtils.CopyMesh(node0.m_mesh);
+
+                        // - modify textures. DONE!
+                        MaterialUtils.HideCrossings(node.m_nodeMaterial, info);
+                        MaterialUtils.HideCrossings(node.m_lodMaterial, info);
+                        if (node.m_nodeMaterial != node.m_material) MaterialUtils.HideCrossings(node.m_material, info);
+
+                        // - new Array DONE!
+                        info.m_nodes = new NetInfo.Node[] { node };
+                    }
+                }
+            }
+            Extensions.Log("HideCrossings completed! Rebuilding lods");
+            Singleton<NetManager>.instance.RebuildLods();
+            Extensions.Log("Done rebuilding lods!");
+        }
+
+        class NodeExt : NetInfo.Node {
+
+        }
+
 
         public static void MakeSameNodeSegMat(NetInfo info) {
             var node = info.m_nodes[0];

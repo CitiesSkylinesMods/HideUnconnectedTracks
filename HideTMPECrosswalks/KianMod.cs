@@ -24,7 +24,7 @@ namespace HideTMPECrosswalks {
         [UsedImplicitly]
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
-            InstallHarmony();
+            //InstallHarmony(); //TODO uncomment
 
             LoadingWrapperPatch.OnPostLevelLoaded += PrefabUtils.CreateNoZebraTextures;
 #if DEBUG
@@ -32,7 +32,6 @@ namespace HideTMPECrosswalks {
 #endif
             if (Extensions.InGame || Extensions.InAssetEditor) {
                 try {
-                    InitAllCache();
                     PrefabUtils.CreateNoZebraTextures();
                 } catch (Exception e) {
                     Extensions.Log(e.ToString());
