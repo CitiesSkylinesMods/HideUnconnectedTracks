@@ -21,7 +21,7 @@ namespace HideTMPECrosswalks {
 
         public void HideCrossings() {
             var seg = netInfo.m_segments[0];
-            //MaterialUtils.HideCrossings(m_nodeMaterial, seg.m_segmentMaterial, netInfo, lod: false);
+            MaterialUtils.HideCrossings(m_nodeMaterial, seg.m_segmentMaterial, netInfo, lod: false);
             MaterialUtils.HideCrossings(m_lodMaterial, seg.m_lodMaterial, netInfo, lod: true);
             //MaterialUtils.HideCrossings(m_material, seg.m_material, netInfo, lod: false);
 

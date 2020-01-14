@@ -84,19 +84,28 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static void CreateNoZebraTextures() {
+#if !DEBUG // exclude in asset editor
+            if (Extensions.currentMode == AppMode.AssetEditor)return;
+#endif
+
             TextureUtils.Init();
             foreach(var info in Roads()) {
                 NodeInfoExt.RemoveNoZebraTexture(info);
                 NodeInfoExt.CreateNoZebraTexture(info);
             }
             Singleton<NetManager>.instance.RebuildLods();
+            Extensions.Log("CreateNoZebraTextures DONE!");
         }
 
         public static void RemoveNoZebraTextures() {
+#if !DEBUG // exclude in asset editor
+            if (Extensions.currentMode == AppMode.AssetEditor)return;
+#endif
             foreach (var info in Roads()) {
                 NodeInfoExt.RemoveNoZebraTexture(info);
             }
             TextureUtils.Clear();
+            Extensions.Log("RemoveNoZebraTextures DONE!");
         }
 
         public static bool CanHideCrossing(this NetInfo info) {

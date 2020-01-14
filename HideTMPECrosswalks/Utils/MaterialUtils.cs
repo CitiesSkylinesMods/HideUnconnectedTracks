@@ -40,8 +40,8 @@ namespace HideTMPECrosswalks.Utils {
                     Extensions.Log("Texture cache hit: " + tex.name);
                 } else {
                     Extensions.Log("POINT A tex = " + tex.name);
+                    tex = tex.GetReadableCopy();
                     tex.CropAndStrech(); if (dump) DumpUtils.Dump(tex, info);
-
                     tex.Finalize(lod);
                     TextureCache[tex] = tex;
                 }

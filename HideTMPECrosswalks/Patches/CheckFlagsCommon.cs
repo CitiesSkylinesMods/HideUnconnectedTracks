@@ -4,6 +4,30 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Reflection;
 
+/* Notes
+ * experiment 1: I created a road cirlcle and connected the middle to avoid any bend/end/direct_connect nodes.
+ *   B1 I put break point on all checkflags that I will not patch.
+ *   J1 I addded and deleted junctiuons (without adding bend/end nodes)
+ *   Z1 I zoommed in and out
+ *   R1 No breakpoint was hit.
+ *
+ *   Z2 I zoomed out
+ *   B2 I added break points on the checkflags calls that I will patch.
+ *   R2 No break points was hit
+ *
+ *   Z3 I zoomed in
+ *   R3 renderinstance breakpoint was hit continuesly
+ *
+ *   B4 I removed the breakpoint that was hit in R3 (render instance call to checkflags that I will patch).
+ *   J4 I added a junction
+ *   Z4 I did this while zoomed in or zoomed out.
+ *   R4 the break points I put in B2 in *groupdata() where hit once everytime I made a change.
+ *
+ *  experiment 2: ShouldHideCrossings always returns true.
+ *
+ *
+ */
+
 
 namespace HideTMPECrosswalks.Patches {
     using Utils;
@@ -11,26 +35,22 @@ namespace HideTMPECrosswalks.Patches {
     public static class CheckFlagsCommon {
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
             NetInfo info = segmentID.ToSegment().Info;
-            bool ret = PrefabUtils.CanHideCrossing(info);
+            bool ret1 = PrefabUtils.CanHideCrossing(info);
 #if DEBUG
+
             if (Extensions.currentMode == AppMode.AssetEditor) {
                 //Extensions.Log($"Should hide crossings: {ret} | stack:\n" + System.Environment.StackTrace);
-                return ret; // always hide crossings in asset editor for quick testing.
+                return ret1; // always hide crossings in asset editor for quick testing.
             }
 #endif
-            ret &= TMPEUTILS.HasCrossingBan(segmentID, nodeID);
-
-            //TODO optimize
-            //bool never = PrefabUtils.NeverZebra(info);
-            //bool always = PrefabUtils.AlwaysZebra(info);
-            //ret |= always;
-            //ret &= !never;
-
-            return ret;
+            ret1 &= TMPEUTILS.HasCrossingBan(segmentID, nodeID);
+            bool ret2 = info.m_netAI is RoadBaseAI;
+            ret2 &= NS2Utils.HideJunction(segmentID);
+            return ret1 || ret2;
         }
 
         public static bool CheckFlags(NetInfo.Node node, NetNode.Flags flags, ushort nodeID, ushort segmentID) {
-            // Extensions.Log("CheckFlagsCommon.CheckFlags() stack=\n" + System.Environment.StackTrace); // TODO check backttrace for *groupdata
+            // Extensions.Log("CheckFlagsCommon.CheckFlags() stack=\n" + System.Environment.StackTrace);
             bool hideCrossings = ShouldHideCrossing(nodeID, segmentID);
             bool ret = NodeInfoExt.CheckFlags2(node, flags, hideCrossings);
             //Extensions.Log($"flags={flags} | ShouldHideCrossings={hideCrossings}  node is NodeInfoExt={node is NodeInfoExt} ret={ret}\n"

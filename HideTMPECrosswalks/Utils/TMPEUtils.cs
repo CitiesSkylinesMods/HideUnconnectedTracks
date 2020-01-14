@@ -6,7 +6,6 @@ using UnityEngine;
 namespace HideTMPECrosswalks.Utils {
     using static Extensions;
 
-    // Code from roundabout builder: https://github.com/Strdate/AutomaticRoundaboutBuilder/blob/master/RoundaboutBuilder/ModLoadingExtension.cs
     public static class TMPEUTILS {
         private static bool warned=false;
 

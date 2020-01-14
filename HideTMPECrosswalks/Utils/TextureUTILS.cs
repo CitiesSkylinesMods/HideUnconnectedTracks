@@ -161,11 +161,10 @@ namespace HideTMPECrosswalks.Utils {
             int yN = texture.height;
 
             int half = xN / 2;
+            float start = half - ratio * half;
             for (int i = 0; i < xN; i++) {
-                int diff = half - i;
-                diff = (int)(diff * ratio);
-                int i2 = half - diff;
-                if (i2 < 0 && i2 >= xN)
+                int i2 = (int)(start + ratio * i);
+                if (i2 < 0 || i2 >= xN)
                     continue;
 
                 Color[] colors = texture.GetPixels(i, 0, 1, yN);
