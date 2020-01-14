@@ -2,10 +2,12 @@
 using ICities;
 using UnityEngine;
 using ColossalFramework;
+using System;
 
 namespace HideTMPECrosswalks {
     using Utils;
-    using static Utils.TextureUtils;
+    using static DebugTests;
+    using static Utils.PrefabUtils;
 
     public class TestOnLoad : LoadingExtensionBase {
         public override void OnCreated(ILoading loading) { base.OnCreated(loading); Test(); }
@@ -15,63 +17,91 @@ namespace HideTMPECrosswalks {
             if (!Extensions.InGame && !Extensions.InAssetEditor)
                 return;
 
-            Extensions.Log("Testing ...");
+            //Extensions.Log("Testing ...");
             ////DebugTests.NameTest();
             ////DebugTests.Dumps();
             ////DebugTests.WierdNodeTest();
-            //DebugTests.UVTest();
-            DebugTests.ChangeTextures();
-            Extensions.Log("Testing Done!");
+            ////DebugTests.UVTest();
+            //_Test();
+            //Extensions.Log("Testing Done!");
         }
 
+        public static void _Test() {
+            foreach (var info in Roads()) {
+                Extensions.Log(info.name);
+                try {
+                    ChangeTextures(info);
+                    //TouchTextures(info);
+                }
+                catch (Exception e) {
+                    Extensions.Log(e.ToString());
+                }
+            }
+            Extensions.Log("Rebuilding lods ... ");
+            Singleton<NetManager>.instance.RebuildLods();
+        }
     }
 
     public static class DebugTests {
         public static string R6L => "Six-Lane Road";
         public static string R4L => "Four-Lane Road";
 
-        public static void ChangeTextures() {
-            int count = PrefabCollection<NetInfo>.LoadedCount();
-            for (uint i = 0; i < count; ++i) {
-                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (info.IsNormalGroundRoad()) {
-                    if (info.GetUncheckedLocalizedTitle() == "Four-Lane Road") {
-                        // - Copy node DONE!
-                        // - unserializable extension Node: DONE!.
-                        var node = new NodeExt();
-                        var node0 = info.m_nodes[0];
-                        Extensions.CopyProperties(node, node0);
+        public class NodeExt : NetInfo.Node { public int extra_field = 2; }
 
-                        // - new material DONE!
-                        // - copy material DONE!
-                        node.m_material = AssetEditorRoadUtils.CopyMaterial(node0.m_material);
-                        node.m_lodMaterial = AssetEditorRoadUtils.CopyMaterial(node0.m_lodMaterial);
-                        if (node0.m_nodeMaterial != node0.m_material) node.m_nodeMaterial = AssetEditorRoadUtils.CopyMaterial(node0.m_nodeMaterial);
+        public static NetInfo GetInfo() {
+            foreach (var info in Roads())
+                if (info.GetUncheckedLocalizedTitle() == "Four-Lane Road")
+                    return info;
+            return null;
+        }
 
-                        // - copy mesh DONE!
-                        node.m_mesh = AssetEditorRoadUtils.CopyMesh(node0.m_mesh);
-                        node.m_lodMesh = AssetEditorRoadUtils.CopyMesh(node0.m_lodMesh);
-                        if (node0.m_nodeMesh != node0.m_mesh) node.m_nodeMesh = AssetEditorRoadUtils.CopyMesh(node0.m_mesh);
+        public static void ChangeTextures(NetInfo info) {
+            Extensions.Log("MARK L0J");
 
-                        // - modify textures. DONE!
-                        MaterialUtils.HideCrossings(node.m_nodeMaterial, info);
-                        MaterialUtils.HideCrossings(node.m_lodMaterial, info);
-                        if (node.m_nodeMaterial != node.m_material) MaterialUtils.HideCrossings(node.m_material, info);
+            var node = info.m_nodes[0];
 
-                        // - new Array DONE!
-                        info.m_nodes = new NetInfo.Node[] { node };
-                    }
-                }
+            {
+                var node2 = new NodeExt();
+                Extensions.CopyProperties<NetInfo.Node>(node2, node);
+                node = node2;
             }
-            Extensions.Log("HideCrossings completed! Rebuilding lods");
-            Singleton<NetManager>.instance.RebuildLods();
-            Extensions.Log("Done rebuilding lods!");
+
+            info.m_nodes = new NetInfo.Node[] { node };
+            //info.m_nodes[0] = node;
+
+            node.m_nodeMaterial = new Material(node.m_nodeMaterial);
+            node.m_material = new Material(node.m_material);
+            node.m_lodMaterial = new Material(node.m_lodMaterial);
+
+            var seg = info.m_segments[0];
+
+            //MaterialUtils.HideCrossings(node.m_nodeMaterial, seg.m_segmentMaterial, info, false);
+            //MaterialUtils.HideCrossings(node.m_material, seg.m_material, info, false);
+            MaterialUtils.HideCrossings(node.m_lodMaterial, seg.m_lodMaterial, info, true);
         }
 
-        class NodeExt : NetInfo.Node {
+        public static void TouchTextures(NetInfo info) {
+            Extensions.Log("MARK L7K");
 
+            var node = info.m_nodes[0];
+
+            {
+                var node2 = new NodeExt();
+                Extensions.CopyProperties<NetInfo.Node>(node2, node);
+                node = node2;
+            }
+
+            info.m_nodes = new NetInfo.Node[] { node };
+            //info.m_nodes[0] = node;
+
+            node.m_nodeMaterial = new Material(node.m_nodeMaterial);
+            node.m_material = new Material(node.m_material);
+            node.m_lodMaterial = new Material(node.m_lodMaterial);
+
+            //MaterialUtils.NOPMaterial(node.m_nodeMaterial, false);
+            //MaterialUtils.NOPMaterial(node.m_material, false);
+            MaterialUtils.NOPMaterial(node.m_lodMaterial, true);
         }
-
 
         public static void MakeSameNodeSegMat(NetInfo info) {
             var node = info.m_nodes[0];
@@ -127,30 +157,6 @@ namespace HideTMPECrosswalks {
         }
         public static bool RoadNameEqual(string n1, string n2) => n1.Trim().ToLower() == n2.Trim().ToLower();
 
-        public static void Dumps() {
-            for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
-                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (info?.m_netAI is RoadAI) {
-                    string name = info.GetUncheckedLocalizedTitle().Trim();
-                    bool b = false;
-                    b |= name == "Six-Lane Road";
-                    //b |= name == "Six-Lane Road with Median";
-                    //b |= name == "Eight-Lane Road";
-                    //b |= name == "Four-Lane Road";
-                    //b |= name == "Four-Lane Road with Median";
-                    //b |= name.ToLower().Contains("suburb");
-                    b |= name.ToLower().Contains("2+3");
-                    b |= name.ToLower().Contains("2+4");
-                    //b = info.category == "RoadsLarge";
-                    if (b) {
-                        Extensions.Log("found " + name);
-                        info = (info.m_netAI as RoadAI).m_elevatedInfo;
-                        DumpDebugTextures(info);
-                    }
-                }
-            }
-        }
-
         public static void UVTest() {
             NetInfo info1 = null, info2 = null;
             for (uint i = 0; i < PrefabCollection<NetInfo>.LoadedCount(); ++i) {
@@ -168,27 +174,6 @@ namespace HideTMPECrosswalks {
                 }
             }
 
-        }
-
-        public static void DumpDebugTextures(NetInfo info) {
-            Material material = info.m_nodes[0].m_nodeMaterial;
-            DumpUtils.Dump(material, ID_APRMap, baseName: "node-original ", info);
-            Material material2 = info.m_segments[0].m_segmentMaterial;
-            DumpUtils.Dump(material2, ID_APRMap, baseName: "segment-original", info);
-
-            var tex = material2.GetTexture(ID_APRMap);
-            if (info.isAsym()) tex = Process(tex, Mirror);
-            float ratio = info.ScaleRatio();
-            if (ratio != 1f) {
-                Texture2D ScaleRatio(Texture2D t) => Scale(t, ratio);
-                tex = Process(tex, ScaleRatio);
-            }
-            string s = ratio == 1 ? "segment-mirrored" : "segment-mirrored-scaled";
-            string path = DumpUtils.GetFilePath(ID_APRMap, s, info);
-            DumpUtils.Dump(tex, path);
-
-            material = MaterialUtils.HideCrossingCached(material, info);
-            DumpUtils.Dump(material, ID_APRMap, baseName: "node-processed ", info);
         }
     }
 }

@@ -10,25 +10,20 @@ namespace HideTMPECrosswalks {
         public bool bHideCrossings;
         public NetInfo netInfo;
         public NodeInfoExt(NetInfo.Node template, NetInfo netInfo) {
-            Extensions.CopyProperties(this, template);
+            Extensions.CopyProperties<NetInfo.Node>(this, template);
             this.netInfo = netInfo;
 
             Extensions.Assert(template.m_material != null, $"template m_material is null netInfo=<{netInfo?.name}>");
             m_nodeMaterial = new Material(template.m_nodeMaterial);
             m_lodMaterial = new Material(template.m_lodMaterial);
-            if (template.m_material == template.m_nodeMaterial) m_material = m_nodeMaterial;
-            else m_material = new Material(template.m_material);
-
-            m_nodeMesh = AssetEditorRoadUtils.CopyMesh(template.m_nodeMesh);
-            m_lodMesh = AssetEditorRoadUtils.CopyMesh(template.m_lodMesh);
-            if (template.m_mesh == template.m_nodeMesh) m_mesh = m_nodeMesh;
-            else m_mesh = AssetEditorRoadUtils.CopyMesh(template.m_nodeMesh);
+            m_material = new Material(template.m_material);
         }
 
         public void HideCrossings() {
-            MaterialUtils.HideCrossings(m_material, netInfo);
-            MaterialUtils.HideCrossings(m_lodMaterial, netInfo);
-            if (m_material != m_nodeMaterial) MaterialUtils.HideCrossings(m_nodeMaterial, netInfo);
+            var seg = netInfo.m_segments[0];
+            //MaterialUtils.HideCrossings(m_nodeMaterial, seg.m_segmentMaterial, netInfo, lod: false);
+            MaterialUtils.HideCrossings(m_lodMaterial, seg.m_lodMaterial, netInfo, lod: true);
+            //MaterialUtils.HideCrossings(m_material, seg.m_material, netInfo, lod: false);
 
             bHideCrossings = true;
         }

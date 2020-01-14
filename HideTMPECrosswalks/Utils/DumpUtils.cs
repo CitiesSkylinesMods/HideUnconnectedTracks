@@ -65,13 +65,13 @@ namespace HideTMPECrosswalks.Utils {
 
         public static void Dump(Material material, int texID, string baseName, NetInfo info) {
             if (material == null) throw new ArgumentNullException("material");
-            Texture2D texture = material.GetReadableTexture(texID);
+            Texture2D texture = material.TryGetTexture2D(texID);
             string path = GetFilePath(texID, baseName ?? material.name, info);
             Dump(texture, path);
         }
 
         public static void Dump(Texture tex, string path) {
-            Texture2D texture = tex.TryMakeReadable();
+            Texture2D texture = (tex as Texture2D).TryMakeReadable();
             Extensions.Log($"Dumping texture:<{texture.name}> size:<{texture.width}x{texture.height}>");
             byte[] bytes = texture.EncodeToPNG();
             Extensions.Log("Dumping to " + path);

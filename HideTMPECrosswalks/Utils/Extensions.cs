@@ -19,6 +19,20 @@ namespace HideTMPECrosswalks.Utils {
             }
         }
 
+        public static void CopyProperties<T>(object target, object origin) {
+            Assert(target is T, "target is T");
+            Assert(origin is T, "origin is T");
+            FieldInfo[] fields = typeof(T).GetFields();
+            foreach (FieldInfo fieldInfo in fields) {
+                //Extensions.Log($"Copying field:<{fieldInfo.Name}> ...>");
+                object value = fieldInfo.GetValue(origin);
+                //string strValue = value?.ToString() ?? "null";
+                //Extensions.Log($"Got field value:<{strValue}> ...>");
+                fieldInfo.SetValue(target, value);
+                //Extensions.Log($"Copied field:<{fieldInfo.Name}> value:<{strValue}>");
+            }
+        }
+
         internal static ref NetNode ToNode(this ushort id) => ref Singleton<NetManager>.instance.m_nodes.m_buffer[id];
         internal static ref NetSegment ToSegment(this ushort id) => ref Singleton<NetManager>.instance.m_segments.m_buffer[id];
         //internal static NetLane ToLane(this int id) => Singleton<NetManager>.instance.m_lanes.m_buffer[id];
