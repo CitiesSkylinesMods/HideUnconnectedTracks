@@ -28,7 +28,7 @@ namespace HideTMPECrosswalks.Utils {
             Texture2D tex, tex2;
             bool dump = false;
 #if DEBUG
-            //dump = true;
+            //dump = lod;
 #endif
             //if (dump) DumpUtils.Dump(info);
 
@@ -69,12 +69,12 @@ namespace HideTMPECrosswalks.Utils {
 
                         tex.CropAndStrech(); if (dump) DumpUtils.Dump(tex, info);
                         if (info.m_netAI is RoadAI) {
-                            if (info.isAsym()) {
+                            if (info.isAsym() && !info.isOneWay()) {
                                 tex2.Mirror();
-                                if (dump) DumpUtils.Dump(tex, info);
+                                if (dump) DumpUtils.Dump(tex2, info);
                             }
                             tex2.Scale(info.ScaleRatio());
-                            if (info.ScaleRatio() != 1f && dump) DumpUtils.Dump(tex, info);
+                            if (info.ScaleRatio() != 1f && dump) DumpUtils.Dump(tex2, info);
                         }
                         tex.MeldDiff(tex2); if (dump) DumpUtils.Dump(tex, info);
 
@@ -82,6 +82,7 @@ namespace HideTMPECrosswalks.Utils {
                         TextureCache[tex] = tex;
                     }
                     material.SetTexture(ID_APRMap, tex);
+                    if (dump) DumpUtils.Dump(tex, DumpUtils.GetFilePath(ID_APRMap, "node-processed", info));
                 } // end if cache
             } // end if tex
         } // end if category

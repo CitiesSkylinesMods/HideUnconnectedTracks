@@ -71,9 +71,15 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static void Dump(Texture tex, string path) {
-            Texture2D texture = (tex as Texture2D).TryMakeReadable();
-            Extensions.Log($"Dumping texture:<{texture.name}> size:<{texture.width}x{texture.height}>");
+            Texture2D texture = tex is Texture2D ? tex as Texture2D : throw new Exception($"texture:{tex} is not texture2D");
+            Extensions.Log($"Dumping texture:<{tex.name}> size:<{tex.width}x{tex.height}>");
+            texture = texture.TryMakeReadable();
+
             byte[] bytes = texture.EncodeToPNG();
+            if (bytes == null) {
+                Extensions.Log($"Warning! bytes == null. Failed to dump {tex?.name} with format  {(tex as Texture2D).format} to {path}.");
+                return;
+            }
             Extensions.Log("Dumping to " + path);
             File.WriteAllBytes(path, bytes);
         }

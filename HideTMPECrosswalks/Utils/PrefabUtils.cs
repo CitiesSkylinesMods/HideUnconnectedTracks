@@ -3,24 +3,35 @@ using System.Collections.Generic;
 
 namespace HideTMPECrosswalks.Utils {
     using ColossalFramework;
+    using System.Diagnostics;
 
     public static class PrefabUtils {
-        internal static bool IsNormalGroundRoad(this NetInfo info) {
+        internal static bool IsNormalRoad(this NetInfo info) {
             try {
-                if (info != null && info.m_netAI is RoadAI) {
-                    var ai = info.m_netAI as RoadAI;
-                    return ai.m_elevatedInfo != null && ai.m_slopeInfo != null;
-                }
-                return false;
+                bool ret = info?.m_netAI is RoadBaseAI;
+                string name = info.name;
+                ret &= name != null;
+                ret &=name.Trim() != "";
+                ret &= !name.ToLower().Contains("toll");
+                return ret;
             }
             catch (Exception e) {
                 Extensions.Log(e.Message);
-                Extensions.Log("IsNormalGroundRoad catched exception");
+                Extensions.Log("IsNormalRoad catched exception");
                 Extensions.Log($"exception: info = {info}");
                 Extensions.Log($"exception: info is {info.GetType()}");
                 Extensions.Log($"Exception: name = {info?.name} ");
                 return false;
             }
+        }
+
+        internal static bool IsNormalGroundRoad(this NetInfo info) {
+            bool ret = info.IsNormalRoad();
+            if(ret && info?.m_netAI is RoadAI) {
+                var ai = info.m_netAI as RoadAI;
+                return ai.m_elevatedInfo != null && ai.m_slopeInfo != null;
+            }
+            return false;
         }
 
         public static bool isAsym(this NetInfo info) => info.m_forwardVehicleLaneCount != info.m_backwardVehicleLaneCount;
@@ -73,46 +84,83 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static IEnumerable<NetInfo> Roads() {
+#if !DEBUG // exclude in asset editor
+            if (Extensions.currentMode == AppMode.AssetEditor)
+                yield return null;
+#endif
             int count = PrefabCollection<NetInfo>.LoadedCount();
             for (uint i = 0; i < count; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (info.IsNormalGroundRoad() && info.CanHideCrossing()) {
-                    if (info.category == "RoadsMedium" || info.category == "RoadsLarge") // TODO delete
-                        yield return info;
+                if (info.CanHideMarkings() ) {
+                    yield return info;
                 }
             }
         }
 
         public static void CreateNoZebraTextures() {
-#if !DEBUG // exclude in asset editor
-            if (Extensions.currentMode == AppMode.AssetEditor)return;
-#endif
-
             TextureUtils.Init();
             foreach(var info in Roads()) {
-                NodeInfoExt.RemoveNoZebraTexture(info);
-                NodeInfoExt.CreateNoZebraTexture(info);
+                Extensions.Log("CreateNoZebraTextures: " + info.GetLocalizedTitle());
+                try {
+                    NodeInfoExt.RemoveNoZebraTexture(info);
+                    NodeInfoExt.CreateNoZebraTexture(info);
+                } catch (Exception e) {
+                    Extensions.Log($"{info?.name ?? "null"} Failed!\n" + e);
+                }
             }
-            Singleton<NetManager>.instance.RebuildLods();
+            UpdateAll();
             Extensions.Log("CreateNoZebraTextures DONE!");
         }
 
         public static void RemoveNoZebraTextures() {
-#if !DEBUG // exclude in asset editor
-            if (Extensions.currentMode == AppMode.AssetEditor)return;
-#endif
             foreach (var info in Roads()) {
-                NodeInfoExt.RemoveNoZebraTexture(info);
+                try {
+                    NodeInfoExt.RemoveNoZebraTexture(info);
+                }
+                catch (Exception e) {
+                    Extensions.Log($"{info?.name ?? "null"} Failed!\n" + e);
+                }
             }
             TextureUtils.Clear();
             Extensions.Log("RemoveNoZebraTextures DONE!");
         }
 
-        public static bool CanHideCrossing(this NetInfo info) {
-            bool ret = info.m_netAI is RoadBaseAI;
+        public static void UpdateAll() {
+            var ticks = Stopwatch.StartNew();
+            Singleton<NetManager>.instance.RebuildLods(); ticks.LogLap("RebuildLods ");
+            for (ushort id = 1; id < NetManager.MAX_SEGMENT_COUNT; ++id) {
+                if ((id.ToSegment().m_flags & NetSegment.Flags.Created) != 0) {
+                    Singleton<NetManager>.instance.UpdateSegment(id);
+                }
+            }
+            ticks.LogLap("Update all segments ");
+        }
+
+        public static int CountJunctionNodes(this NetInfo netInfo) {
+            int ret = 0;
+            foreach (var node in netInfo.m_nodes)
+                if (!(node is NodeInfoExt) && node.CheckFlags(NetNode.Flags.Junction) && node.m_connectGroup == 0)
+                    ret++;
+            return ret;
+        }
+
+        public static bool CanHideMarkings(this NetInfo info) {
+            bool ret = info.IsNormalRoad();
+            ret &= info.CountJunctionNodes() == 1; // TODO handle more than 1 junction nodes.
+            ret &= info.m_connectGroup == NetInfo.ConnectGroup.None;
+            ret &= info.m_connectionClass == null;
+            ret &= info.m_nodeConnectGroups == NetInfo.ConnectGroup.None;
+            ret &= info.IsNormalGroundRoad(); // TODO support E/B/T/S
+            ret &= info.category == "RoadsMedium" || info.category == "RoadsLarge"; // info.category == "RoadsHighway";
+            //ret &= info.category == "RoadsMedium";
+            //ret &= info.isAsym() && !info.isOneWay();
+            return ret;
+        }
+
+        public static bool CanHideCrossings(this NetInfo info) {
+            bool ret = info.CanHideMarkings();
             ret &= info.m_hasPedestrianLanes;
             ret &= info.m_hasForwardVehicleLanes;
-            //ret &= info.GetUncheckedLocalizedTitle() == "Four-Lane Road";
             return ret;
         }
     } // end class

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-
+// TODO handle multiple junction nodes.
 namespace HideTMPECrosswalks {
     using Utils;
 
@@ -36,31 +36,31 @@ namespace HideTMPECrosswalks {
         }
 
         public static void RemoveNoZebraTexture(NetInfo info) {
-            Extensions.Log($"Before len={info.m_nodes.Length}\n" + Environment.StackTrace);
+            //Extensions.Log($"Before len={info.m_nodes.Length}\n" + Environment.StackTrace);
             for (int i = 0; i < info.m_nodes.Length; ++i) {
                 if (info.m_nodes[i] is NodeInfoExt) {
                     RemoveNode(info, i);
                     --i;
                 }
             }
-            Extensions.Log($"After len={info.m_nodes.Length}\n" + Environment.StackTrace);
+            //Extensions.Log($"After len={info.m_nodes.Length}\n" + Environment.StackTrace);
         }
 
         public static void CreateNoZebraTexture(NetInfo info) {
-            Extensions.Log($"Before len={info.m_nodes.Length}\n" + Environment.StackTrace);
+            //Extensions.Log($"Before len={info.m_nodes.Length}\n" + Environment.StackTrace);
             NetInfo.Node template = null;
             foreach (var node in info.m_nodes) {
                 if (node.CheckFlags(NetNode.Flags.Junction) && node.m_connectGroup == 0) {
                     if (template != null)
-                        throw new NotImplementedException("Why are there two junction nodes");
+                        throw new NotImplementedException("more than 1 junction node is not handled");
                     template = node;
-                    break; // TODO remove
                 }
             }
+            Extensions.Assert(template != null, "template!=null");
             NodeInfoExt newNode = new NodeInfoExt(template, info);
             newNode.HideCrossings();
             AddNode(info, newNode);
-            Extensions.Log($"After   len={info.m_nodes.Length}\n" + Environment.StackTrace);
+            //Extensions.Log($"After   len={info.m_nodes.Length}\n" + Environment.StackTrace);
             // PostConditions: 	call Singleton<NetManager>.instance.RebuildLods();
         }
 
@@ -107,9 +107,5 @@ namespace HideTMPECrosswalks {
         public static bool CheckFlags2(NetInfo.Node node, NetNode.Flags flags, bool hideCrossings) {
             return node.CheckFlags(flags) && CheckFlags2(node, hideCrossings);
         }
-
-        // TODO check if No Crossing Node already exist.
-        // TODO check serialization
     }
-
 }

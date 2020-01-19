@@ -1,13 +1,10 @@
-using ICities;
 using System;
 using System.IO;
 using UnityEngine;
 
 namespace HideTMPECrosswalks.Utils {
-    using static Extensions;
-
     public static class TMPEUTILS {
-        private static bool warned=false;
+        static bool exists = true;
 
         public static bool HasCrossingBan(ushort segmentID, ushort nodeID) {
             bool bStartNode = nodeID == segmentID.ToSegment().m_startNode;
@@ -15,23 +12,20 @@ namespace HideTMPECrosswalks.Utils {
         }
 
         public static bool HasCrossingBan(ushort segmentID, bool bStartNode) {
+            if (!exists)
+                return false;
             try {
                 return _HasCrossingBan(segmentID, bStartNode);
             }
             catch (FileNotFoundException _) {
-                if (!warned) {
-                    Debug.Log("ERROR ****** TMPE not found! *****");
-                    warned = true;
-                }
+                Debug.Log("ERROR ****** TMPE not found! *****");
+                exists = false;
             }
             catch (Exception e) {
-                if (!warned) {
-                    Debug.Log(e + "\n" + e.StackTrace);
-                    warned = true;
-                }
+                Debug.Log(e + "\n" + e.StackTrace);
+                exists = false;
             }
             return false;
-
         }
 
         private static bool _HasCrossingBan(ushort segmentID, bool bStartNode) {

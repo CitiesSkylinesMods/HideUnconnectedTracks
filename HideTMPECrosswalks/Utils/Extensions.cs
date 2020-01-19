@@ -54,7 +54,7 @@ namespace HideTMPECrosswalks.Utils {
 
         internal static void LogLap(this Stopwatch ticks, string prefix = "") {
             ticks.Stop();
-            Log(prefix + "TICKS elapsed: " + ticks.ElapsedTicks.ToString("E2"));
+            Log(prefix + " TICKS elapsed: " + ticks.ElapsedTicks.ToString("E2"));
             ticks.Reset();
             ticks.Start();
         }

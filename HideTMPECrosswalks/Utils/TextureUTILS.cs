@@ -149,6 +149,14 @@ namespace HideTMPECrosswalks.Utils {
         }
 
 
+        public static Texture2D CreateTempCopy(this Texture2D tex) {
+            Texture2D ret = new Texture2D(tex.width, tex.height, tex.format,false);
+            ret.SetPixels(tex.GetPixels());
+            ret.Apply();
+            return ret;
+
+        }
+
         /// <summary>
         /// stretches if ratiuo is bigger than 1.
         /// shrinks if ratio is smaller than 1.
@@ -159,6 +167,7 @@ namespace HideTMPECrosswalks.Utils {
             Extensions.Log($"Scaling {texture.name} raito:{ratio}");
             int xN = texture.width;
             int yN = texture.height;
+            Texture2D tmp = texture.CreateTempCopy();
 
             int half = xN / 2;
             float start = half - ratio * half;
@@ -167,12 +176,13 @@ namespace HideTMPECrosswalks.Utils {
                 if (i2 < 0 || i2 >= xN)
                     continue;
 
-                Color[] colors = texture.GetPixels(i, 0, 1, yN);
+                Color[] colors = tmp.GetPixels(i, 0, 1, yN);
                 texture.SetPixels(i2, 0, 1, yN, colors);
             }
             texture.Apply();
             texture.name += $".Scale(ratio={ratio})";
         }
+
 
 
         public static void Mirror(this Texture2D texture) {

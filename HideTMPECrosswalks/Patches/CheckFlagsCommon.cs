@@ -34,19 +34,25 @@ namespace HideTMPECrosswalks.Patches {
     using static TranspilerUtils;
     public static class CheckFlagsCommon {
         public static bool ShouldHideCrossing(ushort nodeID, ushort segmentID) {
+            // TODO move to netnode.updateflags
             NetInfo info = segmentID.ToSegment().Info;
-            bool ret1 = PrefabUtils.CanHideCrossing(info);
-#if DEBUG
+            bool isJunction = (nodeID.ToNode().m_flags & NetNode.Flags.Junction) != 0;
+            Extensions.Assert(isJunction, "isJunction");
+            bool ret0 = info.CanHideMarkings(); // must use the same condition as in Roads()
 
-            if (Extensions.currentMode == AppMode.AssetEditor) {
-                //Extensions.Log($"Should hide crossings: {ret} | stack:\n" + System.Environment.StackTrace);
-                return ret1; // always hide crossings in asset editor for quick testing.
-            }
+            if (Extensions.InAssetEditor ) {
+                //Extensions.Log($"Should hide crossings: {ret0} | stack:\n" + System.Environment.StackTrace);
+#if DEBUG
+                return ret0; // always hide crossings in asset editor for quick testing.
+#else
+            return false;
 #endif
-            ret1 &= TMPEUTILS.HasCrossingBan(segmentID, nodeID);
-            bool ret2 = info.m_netAI is RoadBaseAI;
-            ret2 &= NS2Utils.HideJunction(segmentID);
-            return ret1 || ret2;
+            }
+            bool ret1 = ret0 && TMPEUTILS.HasCrossingBan(segmentID, nodeID) && info.CanHideCrossings();
+            bool ret2 = ret0 && NS2Utils.HideJunction(segmentID);
+            bool ret =  ret1 || ret2;
+            //Extensions.Log($"ShouldHideCrossing ret0:{ret0} ret1:{ret1} ret2:{ret2} ret:{ret}");
+            return ret;
         }
 
         public static bool CheckFlags(NetInfo.Node node, NetNode.Flags flags, ushort nodeID, ushort segmentID) {
