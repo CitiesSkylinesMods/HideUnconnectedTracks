@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace HideTMPECrosswalks.Patches.NetNodePatches {
     using Utils;
 
-    [HarmonyPatch()]
+    //[HarmonyPatch()]
     public static class PopulateGroupData {
         static void Log(string m) => Extensions.Log("PopulateGroupData Transpiler: " + m);
 

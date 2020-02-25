@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace HideTMPECrosswalks.Patches.NetNodePatches {
     using Utils;
 
-    [HarmonyPatch()]
+    //[HarmonyPatch()]
     public static class CalculateGroupData {
         static void Log(string m) => Extensions.Log("CalculateGroupData Transpiler: " + m);
         //public bool CalculateGroupData(ushort nodeID, int layer, ref int vertexCount, ref int triangleCount, ref int objectCount, ref RenderGroup.VertexArrays vertexArrays)

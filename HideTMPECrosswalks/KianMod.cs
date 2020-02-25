@@ -14,18 +14,6 @@ namespace HideTMPECrosswalks {
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
             InstallHarmony();
-
-            LoadingWrapperPatch.OnPostLevelLoaded += PrefabUtils.CreateNoZebraTextures;
-#if DEBUG
-            LoadingWrapperPatch.OnPostLevelLoaded += TestOnLoad.Test;
-#endif
-            if (Extensions.InGame || Extensions.InAssetEditor) {
-                try {
-                    PrefabUtils.CreateNoZebraTextures();
-                } catch (Exception e) {
-                    Extensions.Log(e.ToString());
-                }
-            }
         }
 
         [UsedImplicitly]
@@ -38,12 +26,6 @@ namespace HideTMPECrosswalks {
             LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.CreateNoZebraTextures;
             PrefabUtils.RemoveNoZebraTextures();
         }
-
-
-        //[UsedImplicitly]
-        //public void OnSettingsUI(UIHelperBase helperBasae) {
-        //    new Options(helperBasae);
-        //}
 
         #region Harmony
         HarmonyInstance harmony = null;
