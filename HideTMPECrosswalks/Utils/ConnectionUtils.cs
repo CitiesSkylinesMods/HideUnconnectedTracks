@@ -134,15 +134,21 @@ namespace HideTMPECrosswalks.Utils
                 sourceLaneIndex < nSource; 
                 ++sourceLaneIndex, sourceLaneId = laneBuffer[sourceLaneId].m_nextLane)
             {
+                //Extensions.Log($"sourceLaneId={sourceLaneId} {sourceLaneInfos[sourceLaneIndex].m_laneType} & {laneType} = {sourceLaneInfos[sourceLaneIndex].m_laneType & laneType}\n" +
+                //    $"{sourceLaneInfos[sourceLaneIndex].m_vehicleType} & {vehicleType} = {sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType}");
+
                 if ((sourceLaneInfos[sourceLaneIndex].m_laneType & laneType) == 0 ||
                     (sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType) == 0)
                 {
                     continue;
                 }
-                for (targetLaneIndex = 0, targetLaneId = targetSegmentId.ToSegment().m_lanes; 
-                    targetLaneId < nTarget; 
+                //Extensions.Log($"POINT A> ");
+                for (targetLaneIndex = 0, targetLaneId = targetSegmentId.ToSegment().m_lanes;
+                    targetLaneIndex < nTarget; 
                     ++targetLaneIndex, targetLaneId = laneBuffer[targetLaneId].m_nextLane)
                 {
+                    //Extensions.Log($"targetLaneId={targetLaneId} {targetLaneInfos[targetLaneIndex].m_laneType} & {laneType} = {targetLaneInfos[targetLaneIndex].m_laneType & laneType}\n" +
+                    //    $"{targetLaneInfos[targetLaneIndex].m_vehicleType} & {vehicleType} = {targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType}");
                     if ((targetLaneInfos[targetLaneIndex].m_laneType & laneType) == 0 ||
                         (targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType) == 0)
                     {
@@ -150,6 +156,8 @@ namespace HideTMPECrosswalks.Utils
                     }
                     bool b1 = LCMan.HasConnections(sourceLaneId, sourceStartNode);
                     bool b2 = LCMan.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
+                    Extensions.Log($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} b1={b1} b2={b2}");
+
                     if (!b1 || b2)
                     {
                         return true;

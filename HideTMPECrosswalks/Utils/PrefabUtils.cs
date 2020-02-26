@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace HideTMPECrosswalks.Utils {
     using ColossalFramework;
+    using ICities;
     using System.Diagnostics;
 
     public static class PrefabUtils {

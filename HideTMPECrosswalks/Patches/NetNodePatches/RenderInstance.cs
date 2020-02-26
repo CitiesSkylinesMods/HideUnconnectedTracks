@@ -24,7 +24,7 @@ namespace HideTMPECrosswalks.Patches.NetNodePatches {
         public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
             try {
                 var codes = TranspilerUtils.ToCodeList(instructions);
-                CheckFlagsCommon.PatchCheckFlags(codes, occurance: 2, nodeID_arg: 2, segmentID_loc: 13, Target);
+                CheckTracksCommons.ApplyCheckTracks(codes, Target, occurance:1);
 
                 Log("successfully patched NetNode.RenderInstance");
                 return codes;

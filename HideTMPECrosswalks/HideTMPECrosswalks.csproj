@@ -81,6 +81,7 @@
     <Compile Include="KianMod.cs" />
     <Compile Include="NodeInfoExt.cs" />
     <Compile Include="Patches\CheckFlagsCommon.cs" />
+    <Compile Include="Patches\checkTracksCommons.cs" />
     <Compile Include="Patches\LoadingWrapperPatch.cs" />
     <Compile Include="Patches\NetNodePatches\CalculateGroupData.cs" />
     <Compile Include="Patches\NetNodePatches\PopulateGroupData.cs" />

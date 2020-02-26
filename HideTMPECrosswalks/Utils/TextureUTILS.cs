@@ -87,6 +87,7 @@ namespace HideTMPECrosswalks.Utils {
 #if DEBUG
                     throw new Exception(m);
 #endif
+                    return 0;
             }
         }
 

@@ -7,8 +7,8 @@ using System;
 
 namespace HideTMPECrosswalks {
     public class KianModInfo : IUserMod {
-        public string Name => "RM TMPE Crossings V3.0";
-        public string Description => "Automatically hide crosswalk textures on segment ends when TMPE bans crosswalks";
+        public string Name => "RM Tracks ";
+        public string Description => "Automatically hide unconnected track textures";
 
         [UsedImplicitly]
         public void OnEnabled() {
@@ -23,8 +23,6 @@ namespace HideTMPECrosswalks {
 #if DEBUG
             LoadingWrapperPatch.OnPostLevelLoaded -= TestOnLoad.Test;
 #endif
-            LoadingWrapperPatch.OnPostLevelLoaded -= PrefabUtils.CreateNoZebraTextures;
-            PrefabUtils.RemoveNoZebraTextures();
         }
 
         #region Harmony
