@@ -1,6 +1,6 @@
 using Harmony;
 
-namespace HideTMPECrosswalks.Patches {
+namespace HideUnconnectedTracks.Patches {
     //[HarmonyPatch(typeof(LoadingWrapper), "OnLevelLoaded")]
     public static class LoadingWrapperPatch {
         public delegate void Handler();

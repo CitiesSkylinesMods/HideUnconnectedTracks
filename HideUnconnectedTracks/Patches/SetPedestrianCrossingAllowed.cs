@@ -2,7 +2,7 @@ using Harmony;
 using ColossalFramework;
 using TrafficManager.Manager.Impl;
 
-namespace HideTMPECrosswalks.Patches {
+namespace HideUnconnectedTracks.Patches {
     using Utils;
     //public bool SetPedestrianCrossingAllowed(ushort segmentId, bool startNode, bool value);
     //[HarmonyPatch(typeof(JunctionRestrictionsManager), "SetPedestrianCrossingAllowed")]

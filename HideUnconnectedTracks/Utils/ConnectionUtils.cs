@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TrafficManager.Manager.Impl;
 using TrafficManager.State;
 
-namespace HideTMPECrosswalks.Utils
+namespace HideUnconnectedTracks.Utils
 {
     public static class ConnectionUtils
     {
@@ -167,6 +167,34 @@ namespace HideTMPECrosswalks.Utils
             return false;
         }
 
+        public static VehicleInfo.VehicleType GetVehicleType(NetInfo.Node nodeInfo, NetInfo.ConnectGroup flags) {
+            VehicleInfo.VehicleType ret = 0;
+            const NetInfo.ConnectGroup TRAM =
+                NetInfo.ConnectGroup.CenterTram |
+                NetInfo.ConnectGroup.NarrowTram |
+                NetInfo.ConnectGroup.SingleTram |
+                NetInfo.ConnectGroup.WideTram;
+            const NetInfo.ConnectGroup TRAIN =
+                NetInfo.ConnectGroup.DoubleTrain |
+                NetInfo.ConnectGroup.SingleTrain |
+                NetInfo.ConnectGroup.TrainStation;
+            const NetInfo.ConnectGroup MONO_RAIL =
+                NetInfo.ConnectGroup.DoubleMonorail |
+                NetInfo.ConnectGroup.SingleMonorail |
+                NetInfo.ConnectGroup.MonorailStation;
+
+            if ((flags & TRAM) != 0) {
+                ret |= VehicleInfo.VehicleType.Tram;
+            }
+            if ((flags & TRAIN) != 0) {
+                ret |= VehicleInfo.VehicleType.Train;
+            }
+            if ((flags & MONO_RAIL) != 0) {
+                ret |= VehicleInfo.VehicleType.Monorail;
+            }
+
+            return ret;
+        }
 
     }
 }

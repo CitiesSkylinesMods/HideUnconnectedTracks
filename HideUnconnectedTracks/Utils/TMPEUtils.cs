@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using UnityEngine;
 
-namespace HideTMPECrosswalks.Utils {
+namespace HideUnconnectedTracks.Utils {
     public static class TMPEUTILS {
         static bool exists = true;
 

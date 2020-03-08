@@ -53,11 +53,11 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="TMPE.CitiesGameBridge">
-      <HintPath>..\..\..\KianButtonMod\dependencies\TMPE.CitiesGameBridge.dll</HintPath>
+      <HintPath>..\libs\TMPE.CitiesGameBridge.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="TMPE.GenericGameBridge">
-      <HintPath>..\..\..\KianButtonMod\dependencies\TMPE.GenericGameBridge.dll</HintPath>
+      <HintPath>..\libs\TMPE.GenericGameBridge.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
@@ -79,25 +79,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KianMod.cs" />
-    <Compile Include="NodeInfoExt.cs" />
-    <Compile Include="Patches\CheckFlagsCommon.cs" />
+    <Compile Include="SegmentEndExt.cs" />
     <Compile Include="Patches\checkTracksCommons.cs" />
     <Compile Include="Patches\LoadingWrapperPatch.cs" />
-    <Compile Include="Patches\NetNodePatches\CalculateGroupData.cs" />
-    <Compile Include="Patches\NetNodePatches\PopulateGroupData.cs" />
     <Compile Include="Patches\NetNodePatches\RenderInstance.cs" />
     <Compile Include="Patches\SetPedestrianCrossingAllowed.cs" />
     <Compile Include="Patches\TranspilerUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Utils\ConnectionUtils.cs" />
-    <Compile Include="Utils\DumpUtils.cs" />
-    <Compile Include="Utils\ColorUtils.cs" />
     <Compile Include="Utils\Extensions.cs" />
-    <Compile Include="Utils\MaterialUtils.cs" />
-    <Compile Include="Utils\NS2Utils.cs" />
-    <Compile Include="Utils\PrefabUtils.cs" />
-    <Compile Include="Utils\TextureUTILS.cs" />
     <Compile Include="Utils\TMPEUtils.cs" />
   </ItemGroup>
   <ItemGroup />

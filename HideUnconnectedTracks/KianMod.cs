@@ -1,11 +1,11 @@
 using Harmony;
 using ICities;
 using JetBrains.Annotations;
-using HideTMPECrosswalks.Utils;
-using HideTMPECrosswalks.Patches;
+using HideUnconnectedTracks.Utils;
+using HideUnconnectedTracks.Patches;
 using System;
 
-namespace HideTMPECrosswalks {
+namespace HideUnconnectedTracks {
     public class KianModInfo : IUserMod {
         public string Name => "RM Tracks ";
         public string Description => "Automatically hide unconnected track textures";

@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 
-namespace HideTMPECrosswalks.Patches.NetNodePatches {
+namespace HideUnconnectedTracks.Patches.NetNodePatches {
     using Utils;
 
     [HarmonyPatch()]

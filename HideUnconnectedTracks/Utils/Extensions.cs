@@ -3,8 +3,10 @@ using ICities;
 using System.Diagnostics;
 using System.Reflection;
 using System;
+using System.Linq;
+using GenericGameBridge.Service;
 
-namespace HideTMPECrosswalks.Utils {
+namespace HideUnconnectedTracks.Utils {
 
     public static class Extensions {
         public static void CopyProperties(object target, object origin) {
@@ -33,9 +35,23 @@ namespace HideTMPECrosswalks.Utils {
             }
         }
 
+        public static T Max<T>()
+            where T : Enum =>
+           System.Enum.GetValues(typeof(T)).Cast<T>().Max();
+
+        public static void SetBit(this ref byte b, int idx) => b |= (byte)(1 << idx);
+        public static void ClearBit(this ref byte b, int idx) => b &= ((byte)~(1 << idx));
+        public static bool GetBit(this byte b, int idx) => (b | (byte)(1 << idx)) != 0;
+        public static void SetBit(this ref byte b, int idx, bool value) {
+            if (value)
+                b.SetBit(idx);
+            else
+                b.ClearBit(idx);
+        }
+
         internal static ref NetNode ToNode(this ushort id) => ref Singleton<NetManager>.instance.m_nodes.m_buffer[id];
         internal static ref NetSegment ToSegment(this ushort id) => ref Singleton<NetManager>.instance.m_segments.m_buffer[id];
-        //internal static NetLane ToLane(this int id) => Singleton<NetManager>.instance.m_lanes.m_buffer[id];
+        internal static NetLane ToLane(this uint id) => Singleton<NetManager>.instance.m_lanes.m_buffer[id];
 
         internal static AppMode currentMode => SimulationManager.instance.m_ManagersWrapper.loading.currentMode;
         internal static bool CheckGameMode(AppMode mode) => CheckGameMode(new[] { mode });
@@ -103,6 +119,8 @@ namespace HideTMPECrosswalks.Utils {
                 return ss[1];
             return s;
         }
+
+        public static INetService netService => TrafficManager.Constants.ServiceFactory.NetService;
 
     }
 }
