@@ -7,8 +7,8 @@
     <ProjectGuid>{17034566-78DF-4C3D-BD3F-3B833CB2D872}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>HideTMPECrosswalks</RootNamespace>
-    <AssemblyName>HideTMPECrosswalks</AssemblyName>
+    <RootNamespace>HideUnconnectedTracks</RootNamespace>
+    <AssemblyName>HideUnconnectedTracks</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>false</Deterministic>
