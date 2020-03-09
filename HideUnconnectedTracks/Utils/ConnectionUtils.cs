@@ -113,6 +113,24 @@ namespace HideUnconnectedTracks.Utils
             }
         }
 #endif
+
+        public static bool ShouldConnectTracks(
+            ushort segmentId1,
+            ushort segmentId2,
+            ushort nodeId,
+            int nodeInfoIDX) {
+            NetInfo.Node nodeInfo = segmentId1.ToSegment().Info.m_nodes[nodeInfoIDX];
+            VehicleInfo.VehicleType vehicleType = ConnectionUtils.GetVehicleType(nodeInfo, nodeInfo.m_connectGroup);
+            if (vehicleType == 0)
+                return true;
+            return ShouldConnectTracks(
+                segmentId1,
+                segmentId2,
+                nodeId,
+                NetInfo.LaneType.All,
+                vehicleType);
+        }
+
         // assuming that the segments can have connected lanes.
         public static bool ShouldConnectTracks(
             ushort sourceSegmentId,

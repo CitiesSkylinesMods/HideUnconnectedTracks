@@ -17,6 +17,7 @@ namespace HideUnconnectedTracks.Patches {
             ref RenderManager.Instance data) {
             ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
             int targetSegmentIDX = data.m_dataInt0 >> 4;
+
             return SegmentEnd.GetShouldConnectTracks(
                 sourceSegmentID,
                 targetSegmentIDX,

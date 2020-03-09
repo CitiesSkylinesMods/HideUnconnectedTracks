@@ -41,7 +41,7 @@ namespace HideUnconnectedTracks.Utils {
 
         public static void SetBit(this ref byte b, int idx) => b |= (byte)(1 << idx);
         public static void ClearBit(this ref byte b, int idx) => b &= ((byte)~(1 << idx));
-        public static bool GetBit(this byte b, int idx) => (b | (byte)(1 << idx)) != 0;
+        public static bool GetBit(this byte b, int idx) => (b & (byte)(1 << idx)) != 0;
         public static void SetBit(this ref byte b, int idx, bool value) {
             if (value)
                 b.SetBit(idx);

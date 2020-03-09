@@ -9,51 +9,28 @@ namespace HideUnconnectedTracks {
 
 
     internal class SegmentEnd {
-        internal readonly ushort SegmentID;
-        internal readonly ushort NodeID;
-        internal NetInfo Info { get; private set; }
-
         private byte[] _connections;
 
         internal SegmentEnd(ushort segmentId, ushort nodeId) {
-            SegmentID = segmentId;
-            NodeID = nodeId;
-            Recalculate();
+            Recalculate(segmentId, nodeId);
         }
 
         public bool GetShouldConnect(int segmentIDX, int nodeInfoIDX) =>
-            _connections[(int)nodeInfoIDX].GetBit(segmentIDX);
+            _connections[nodeInfoIDX].GetBit(segmentIDX);
 
         private void SetShouldConnect(int segmentIDX, int nodeInfoIDX, bool value) =>
             _connections[nodeInfoIDX].SetBit(segmentIDX, value);
 
-        private static bool ShouldConnectTracksRaw(
-            ushort segmentId1,
-            ushort segmentId2,
-            ushort nodeId,
-            int nodeInfoIDX) {
-            NetInfo.Node nodeInfo = segmentId1.ToSegment().Info.m_nodes[nodeInfoIDX];
-            VehicleInfo.VehicleType vehicleType = ConnectionUtils.GetVehicleType(nodeInfo, nodeInfo.m_connectGroup);
-            if (vehicleType == 0)
-                return true;
-            return ConnectionUtils.ShouldConnectTracks(
-                segmentId1,
-                segmentId2,
-                nodeId,
-                NetInfo.LaneType.All,
-                vehicleType);
-        }
-
-        internal void Recalculate() {
-            Info = SegmentID.ToSegment().Info;
-            _connections = new byte[Info.m_nodes.Length];
+        internal void Recalculate(ushort segmentId, ushort nodeID) {
+            NetInfo info = segmentId.ToSegment().Info;
+            _connections = _connections ?? new byte[info.m_nodes.Length];
             for (int segmentIDX = 0; segmentIDX < 8; ++segmentIDX) {
-                ushort targetSegmentId = NodeID.ToNode().GetSegment(segmentIDX);
-                for (int nodeInfoIDX = 0; nodeInfoIDX < Info.m_nodes.Length; ++nodeInfoIDX) {
-                    bool connect = ShouldConnectTracksRaw(
-                        SegmentID,
+                ushort targetSegmentId = nodeID.ToNode().GetSegment(segmentIDX);
+                for (int nodeInfoIDX = 0; nodeInfoIDX < info.m_nodes.Length; ++nodeInfoIDX) {
+                    bool connect = ConnectionUtils.ShouldConnectTracks(
+                        segmentId,
                         targetSegmentId,
-                        NodeID,
+                        nodeID,
                         nodeInfoIDX);
                     SetShouldConnect(segmentIDX, nodeInfoIDX, connect);
                 }
@@ -74,14 +51,17 @@ namespace HideUnconnectedTracks {
         } // end method
 
         public static void OnUpdateSegment(ushort segmentId) {
-            var flags = segmentId.ToSegment().m_flags;
             foreach (var startNode in new[] { false, true }) {
                 int index = GetSegmentEndIndex(segmentId, startNode);
                 if (!Extensions.netService.IsSegmentValid(segmentId)) {
                     SegmentEndArray[index] = null;
                 } else {
+                    Extensions.Assert(SegmentEndArray != null, "SegmentEndArray!=null");
                     ushort nodeId = startNode ? segmentId.ToSegment().m_startNode : segmentId.ToSegment().m_endNode;
-                    SegmentEndArray[index] = new SegmentEnd(segmentId, nodeId);
+                    if (SegmentEndArray[index] == null)
+                        SegmentEndArray[index] = new SegmentEnd(segmentId, nodeId);
+                    else
+                        SegmentEndArray[index].Recalculate(segmentId, nodeId);
                 }
             }
         }
@@ -94,7 +74,10 @@ namespace HideUnconnectedTracks {
             bool ?startNode = (bool)Extensions.netService.IsStartNode(sourceSegmentId, nodeId);
             Extensions.Assert(startNode != null, "startNode != null");
             int index = GetSegmentEndIndex(sourceSegmentId, (bool)startNode);
-            return SegmentEndArray?[index]?.GetShouldConnect(targetSegmentIDX, nodeInfoIDX) ?? true;
+            OnUpdateSegment(sourceSegmentId);
+            Extensions.Assert(SegmentEndArray != null, "SegmentEndArray!=null");
+            Extensions.Assert(SegmentEndArray?[index] != null, "SegmentEndArray!=null");
+            return SegmentEndArray[index].GetShouldConnect(targetSegmentIDX, nodeInfoIDX);
         }
 
         #endregion

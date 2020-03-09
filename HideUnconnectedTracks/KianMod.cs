@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using HideUnconnectedTracks.Utils;
 using HideUnconnectedTracks.Patches;
 using System;
+using UnityEngine.SceneManagement;
 
 namespace HideUnconnectedTracks {
     public class KianModInfo : IUserMod {
@@ -14,11 +15,16 @@ namespace HideUnconnectedTracks {
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
             InstallHarmony();
+            LoadingWrapperPatch.OnPostLevelLoaded += SegmentEnd.InitSegmentEndArray;
+            if(SceneManager.GetActiveScene().name.Equals("Game")) 
+                SegmentEnd.InitSegmentEndArray();
         }
 
         [UsedImplicitly]
         public void OnDisabled() {
             UninstallHarmony();
+            LoadingWrapperPatch.OnPostLevelLoaded -= SegmentEnd.InitSegmentEndArray;
+
 
 #if DEBUG
             LoadingWrapperPatch.OnPostLevelLoaded -= TestOnLoad.Test;
@@ -50,9 +56,4 @@ namespace HideUnconnectedTracks {
         }
         #endregion
     }
-
-#if DEBUG
-
-#endif
-
 }
