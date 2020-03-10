@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using ColossalFramework;
-/* Notes
- * experiment 1: 
- */
 
 namespace HideUnconnectedTracks.Patches {
     using Utils;
