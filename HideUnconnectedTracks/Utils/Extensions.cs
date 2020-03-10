@@ -9,32 +9,6 @@ using GenericGameBridge.Service;
 namespace HideUnconnectedTracks.Utils {
 
     public static class Extensions {
-        public static void CopyProperties(object target, object origin) {
-            FieldInfo[] fields = origin.GetType().GetFields();
-            foreach (FieldInfo fieldInfo in fields) {
-                //Extensions.Log($"Copying field:<{fieldInfo.Name}> ...>");
-                object value = fieldInfo.GetValue(origin);
-                string strValue = value?.ToString() ?? "null";
-                //Extensions.Log($"Got field value:<{strValue}> ...>");
-                fieldInfo.SetValue(target, value);
-                //Extensions.Log($"Copied field:<{fieldInfo.Name}> value:<{strValue}>");
-            }
-        }
-
-        public static void CopyProperties<T>(object target, object origin) {
-            Assert(target is T, "target is T");
-            Assert(origin is T, "origin is T");
-            FieldInfo[] fields = typeof(T).GetFields();
-            foreach (FieldInfo fieldInfo in fields) {
-                //Extensions.Log($"Copying field:<{fieldInfo.Name}> ...>");
-                object value = fieldInfo.GetValue(origin);
-                //string strValue = value?.ToString() ?? "null";
-                //Extensions.Log($"Got field value:<{strValue}> ...>");
-                fieldInfo.SetValue(target, value);
-                //Extensions.Log($"Copied field:<{fieldInfo.Name}> value:<{strValue}>");
-            }
-        }
-
         public static T Max<T>()
             where T : Enum =>
            System.Enum.GetValues(typeof(T)).Cast<T>().Max();
@@ -67,33 +41,11 @@ namespace HideUnconnectedTracks.Utils {
         internal static bool InGame => CheckGameMode(AppMode.Game);
         internal static bool InAssetEditor => CheckGameMode(AppMode.AssetEditor);
 
-
-        internal static void LogLap(this Stopwatch ticks, string prefix = "") {
-            ticks.Stop();
-            Log(prefix + " TICKS elapsed: " + ticks.ElapsedTicks.ToString("E2"));
-            ticks.Reset();
-            ticks.Start();
+        internal static void Log(string m, bool u=false) {
+            Utils.Log.Info(m);
+            if (u) UnityEngine.Debug.Log(m);
         }
-        internal static void Lap(this Stopwatch ticks) {
-            ticks.Reset();
-            ticks.Start();
-        }
-
-        static object LogLock = new object();
-        internal static void Log(string m, bool unitylog = false) {
-            lock (LogLock) {
-                //var st = System.Environment.StackTrace;
-                //m  = st + " : \n" + m;
-#if DEBUG
-                UnityEngine.Debug.Log(m);
-#else
-                if(unitylog)UnityEngine.Debug.Log(m);
-#endif
-
-
-                System.IO.File.AppendAllText("mod.debug.log", m + "\n\n");
-            }
-        }
+        
         internal static void Assert(bool con, string m="") {
             if (!con) throw new System.Exception("Assertion failed: " + m);
         }

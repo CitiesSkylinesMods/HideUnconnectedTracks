@@ -79,16 +79,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="KianMod.cs" />
-    <Compile Include="SegmentEndExt.cs" />
-    <Compile Include="Patches\checkTracksCommons.cs" />
-    <Compile Include="Patches\LoadingWrapperPatch.cs" />
+    <Compile Include="Patches\NetNodePatches\checkTracksCommons.cs" />
     <Compile Include="Patches\NetNodePatches\RenderInstance.cs" />
     <Compile Include="Patches\SetPedestrianCrossingAllowed.cs" />
     <Compile Include="Patches\TranspilerUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tests.cs" />
-    <Compile Include="Utils\ConnectionUtils.cs" />
+    <Compile Include="Utils\DirectConnectUtil.cs" />
     <Compile Include="Utils\Extensions.cs" />
+    <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\TMPEUtils.cs" />
   </ItemGroup>
   <ItemGroup />

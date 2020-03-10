@@ -18,9 +18,9 @@ namespace HideUnconnectedTracks.Patches {
             ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
             int targetSegmentIDX = data.m_dataInt0 >> 4;
 
-            return SegmentEnd.GetShouldConnectTracks(
+            return DirectConnectUtil.HasDirectConnect(
                 sourceSegmentID,
-                targetSegmentIDX,
+                nodeId.ToNode().GetSegment(targetSegmentIDX),
                 nodeId,
                 nodeInfoIDX);
         }
