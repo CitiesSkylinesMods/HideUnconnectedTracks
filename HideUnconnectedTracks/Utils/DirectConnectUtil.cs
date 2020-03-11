@@ -1,6 +1,4 @@
 namespace HideUnconnectedTracks.Utils {
-    using CSUtil.Commons;
-    using TrafficManager.Manager.Impl;
     using static HideUnconnectedTracks.Utils.Extensions;
 
     public static class DirectConnectUtil {

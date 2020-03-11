@@ -14,12 +14,19 @@ namespace HideUnconnectedTracks.Patches {
             ref RenderManager.Instance data) {
             ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
             int targetSegmentIDX = data.m_dataInt0 >> 4;
-
-            return DirectConnectUtil.HasDirectConnect(
-                sourceSegmentID,
-                nodeId.ToNode().GetSegment(targetSegmentIDX),
-                nodeId,
-                nodeInfoIDX);
+            if (TMPEUTILS.exists) {
+                try {
+                    return DirectConnectUtil.HasDirectConnect(
+                        sourceSegmentID,
+                        nodeId.ToNode().GetSegment(targetSegmentIDX),
+                        nodeId,
+                        nodeInfoIDX);
+                }
+                catch {
+                    TMPEUTILS.exists = false;
+                }
+            }
+            return true;
         }
 
         static MethodInfo mShouldConnectTracks => typeof(CheckTracksCommons).GetMethod("ShouldConnectTracks");

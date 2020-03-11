@@ -2,9 +2,8 @@ using Harmony;
 using ICities;
 using JetBrains.Annotations;
 using HideUnconnectedTracks.Utils;
-using HideUnconnectedTracks.Patches;
-using System;
-using UnityEngine.SceneManagement;
+using ColossalFramework;
+using UnityEngine;
 
 namespace HideUnconnectedTracks {
     public class KianModInfo : IUserMod {
@@ -15,10 +14,13 @@ namespace HideUnconnectedTracks {
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
             InstallHarmony();
+            LoadingManager.instance.m_levelPreLoaded += TMPEUTILS.Init;
+            TMPEUTILS.Init();
         }
 
         [UsedImplicitly]
         public void OnDisabled() {
+            LoadingManager.instance.m_levelPreLoaded -= TMPEUTILS.Init;
             UninstallHarmony();
         }
 
