@@ -30,9 +30,9 @@ namespace HideUnconnectedTracks {
         void InstallHarmony() {
             if (harmony == null) {
                 Extensions.Log("HideUnconnectedTracks Patching...", true);
-#if DEBUG
-                HarmonyInstance.DEBUG = true;
-#endif
+//#if DEBUG
+//                HarmonyInstance.DEBUG = true;
+//#endif
                 HarmonyInstance.SELF_PATCHING = false;
                 harmony = HarmonyInstance.Create(HarmonyId);
                 harmony.PatchAll(GetType().Assembly);
