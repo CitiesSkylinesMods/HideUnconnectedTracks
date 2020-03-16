@@ -2,7 +2,7 @@ namespace HideUnconnectedTracks.Utils {
     using static HideUnconnectedTracks.Utils.Extensions;
 
     public static class DirectConnectUtil {
-        internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.Node nodeInfo, NetInfo.ConnectGroup flags) {
+        internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.ConnectGroup flags) {
             VehicleInfo.VehicleType ret = 0;
             const NetInfo.ConnectGroup TRAM =
                 NetInfo.ConnectGroup.CenterTram |
@@ -17,9 +17,13 @@ namespace HideUnconnectedTracks.Utils {
                 NetInfo.ConnectGroup.DoubleMonorail |
                 NetInfo.ConnectGroup.SingleMonorail |
                 NetInfo.ConnectGroup.MonorailStation;
+            const NetInfo.ConnectGroup METRO = TRAM; // MOM uses TRAM for metro because metro does not have ConnectGroup.
 
             if ((flags & TRAM) != 0) {
                 ret |= VehicleInfo.VehicleType.Tram;
+            }
+            if ((flags & METRO) != 0) {
+                ret |= VehicleInfo.VehicleType.Metro;
             }
             if ((flags & TRAIN) != 0) {
                 ret |= VehicleInfo.VehicleType.Train;
@@ -47,7 +51,7 @@ namespace HideUnconnectedTracks.Utils {
             ushort nodeId,
             int nodeInfoIDX) {
             NetInfo.Node nodeInfo = segmentId1.ToSegment().Info.m_nodes[nodeInfoIDX];
-            VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo, nodeInfo.m_connectGroup);
+            VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
             if (vehicleType == 0)
                 return true;
             return HasDirectConnect(
