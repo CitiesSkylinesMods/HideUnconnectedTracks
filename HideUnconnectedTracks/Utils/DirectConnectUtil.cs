@@ -1,4 +1,4 @@
-namespace HideUnconnectedTracks.Utils {
+ namespace HideUnconnectedTracks.Utils {
     using static HideUnconnectedTracks.Utils.Extensions;
 
     public static class DirectConnectUtil {
@@ -17,10 +17,15 @@ namespace HideUnconnectedTracks.Utils {
                 NetInfo.ConnectGroup.DoubleMonorail |
                 NetInfo.ConnectGroup.SingleMonorail |
                 NetInfo.ConnectGroup.MonorailStation;
-            const NetInfo.ConnectGroup METRO = TRAM; // MOM uses TRAM for metro because metro does not have ConnectGroup.
+
+            const NetInfo.ConnectGroup METRO =
+                NetInfo.ConnectGroup.DoubleMetro |
+                NetInfo.ConnectGroup.SingleMetro |
+                NetInfo.ConnectGroup.MetroStation;            
 
             if ((flags & TRAM) != 0) {
                 ret |= VehicleInfo.VehicleType.Tram;
+                ret |= VehicleInfo.VehicleType.Metro; // MOM
             }
             if ((flags & METRO) != 0) {
                 ret |= VehicleInfo.VehicleType.Metro;
