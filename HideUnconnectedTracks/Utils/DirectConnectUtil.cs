@@ -1,7 +1,17 @@
  namespace HideUnconnectedTracks.Utils {
+    using ColossalFramework;
     using static HideUnconnectedTracks.Utils.Extensions;
 
     public static class DirectConnectUtil {
+        //public const VehicleInfo.VehicleType TRACK_VEHICLE_TYPES =
+        //    VehicleInfo.VehicleType.Tram |
+        //    VehicleInfo.VehicleType.Metro |
+        //    VehicleInfo.VehicleType.Train |
+        //    VehicleInfo.VehicleType.Monorail;
+
+        public static bool HasLane(ushort segmentID, VehicleInfo.VehicleType vehicleType) =>
+             (segmentID.ToSegment().Info.m_vehicleTypes & vehicleType) != 0;
+
         internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.ConnectGroup flags) {
             VehicleInfo.VehicleType ret = 0;
             const NetInfo.ConnectGroup TRAM =
@@ -17,11 +27,16 @@
                 NetInfo.ConnectGroup.DoubleMonorail |
                 NetInfo.ConnectGroup.SingleMonorail |
                 NetInfo.ConnectGroup.MonorailStation;
-
             const NetInfo.ConnectGroup METRO =
                 NetInfo.ConnectGroup.DoubleMetro |
                 NetInfo.ConnectGroup.SingleMetro |
-                NetInfo.ConnectGroup.MetroStation;            
+                NetInfo.ConnectGroup.MetroStation;
+
+            const NetInfo.ConnectGroup TROLLY =
+                NetInfo.ConnectGroup.CenterTrolleybus |
+                NetInfo.ConnectGroup.NarrowTrolleybus |
+                NetInfo.ConnectGroup.SingleTrolleybus |
+                NetInfo.ConnectGroup.WideTrolleybus;
 
             if ((flags & TRAM) != 0) {
                 ret |= VehicleInfo.VehicleType.Tram;
@@ -36,7 +51,9 @@
             if ((flags & MONO_RAIL) != 0) {
                 ret |= VehicleInfo.VehicleType.Monorail;
             }
-
+            if ((flags & TROLLY) != 0) {
+                ret |= VehicleInfo.VehicleType.Trolleybus;
+            }
             return ret;
         }
 
@@ -57,8 +74,8 @@
             int nodeInfoIDX) {
             NetInfo.Node nodeInfo = segmentId1.ToSegment().Info.m_nodes[nodeInfoIDX];
             VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
-            if (vehicleType == 0)
-                return true;
+            if (!HasLane(segmentId1, vehicleType)) // vehicleType == 0 is also checked here
+                return true; 
             return HasDirectConnect(
                 segmentId1,
                 segmentId2,

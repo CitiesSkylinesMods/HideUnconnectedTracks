@@ -1,4 +1,4 @@
-using Harmony;
+using HarmonyLib;
 using ICities;
 using JetBrains.Annotations;
 using HideUnconnectedTracks.Utils;
@@ -25,7 +25,7 @@ namespace HideUnconnectedTracks {
         }
 
         #region Harmony
-        HarmonyInstance harmony = null;
+        Harmony harmony = null;
         const string HarmonyId = "CS.kian.HideUnconnectedTracks";
         void InstallHarmony() {
             if (harmony == null) {
@@ -33,8 +33,7 @@ namespace HideUnconnectedTracks {
 //#if DEBUG
 //                HarmonyInstance.DEBUG = true;
 //#endif
-                HarmonyInstance.SELF_PATCHING = false;
-                harmony = HarmonyInstance.Create(HarmonyId);
+                harmony = new Harmony(HarmonyId);
                 harmony.PatchAll(GetType().Assembly);
                 Extensions.Log("HideUnconnectedTracks Patching Completed!", true);
             }
