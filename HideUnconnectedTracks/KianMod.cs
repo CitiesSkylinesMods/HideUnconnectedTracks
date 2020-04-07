@@ -2,8 +2,7 @@ using HarmonyLib;
 using ICities;
 using JetBrains.Annotations;
 using HideUnconnectedTracks.Utils;
-using ColossalFramework;
-using UnityEngine;
+using CitiesHarmony.API;
 
 namespace HideUnconnectedTracks {
     public class KianModInfo : IUserMod {
@@ -13,7 +12,7 @@ namespace HideUnconnectedTracks {
         [UsedImplicitly]
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
-            InstallHarmony();
+            HarmonyHelper.DoOnHarmonyReady(InstallHarmony); 
             LoadingManager.instance.m_levelPreLoaded += TMPEUTILS.Init;
             TMPEUTILS.Init();
         }
@@ -25,25 +24,28 @@ namespace HideUnconnectedTracks {
         }
 
         #region Harmony
-        Harmony harmony = null;
+        bool installed = false;
+        object HarmonyObject = null;
         const string HarmonyId = "CS.kian.HideUnconnectedTracks";
         void InstallHarmony() {
-            if (harmony == null) {
+            if (!installed) {
                 Extensions.Log("HideUnconnectedTracks Patching...", true);
 //#if DEBUG
 //                HarmonyInstance.DEBUG = true;
 //#endif
-                harmony = new Harmony(HarmonyId);
+                Harmony harmony = new Harmony(HarmonyId);
                 harmony.PatchAll(GetType().Assembly);
                 Extensions.Log("HideUnconnectedTracks Patching Completed!", true);
+                installed = true;
             }
         }
 
         void UninstallHarmony() {
-            if (harmony != null) {
+            if (installed) {
+                Harmony harmony = new Harmony(HarmonyId);
                 harmony.UnpatchAll(HarmonyId);
-                harmony = null;
                 Extensions.Log("HideUnconnectedTracks patches Reverted.", true);
+                installed = false;
             }
         }
         #endregion
