@@ -3,6 +3,7 @@ using ICities;
 using JetBrains.Annotations;
 using HideUnconnectedTracks.Utils;
 using CitiesHarmony.API;
+using System.Runtime.CompilerServices;
 
 namespace HideUnconnectedTracks {
     public class KianModInfo : IUserMod {
@@ -10,6 +11,7 @@ namespace HideUnconnectedTracks {
         public string Description => "Automatically hide unconnected track textures";
 
         [UsedImplicitly]
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
             HarmonyHelper.DoOnHarmonyReady(InstallHarmony); 
@@ -26,6 +28,8 @@ namespace HideUnconnectedTracks {
         #region Harmony
         bool installed = false;
         const string HarmonyId = "CS.kian.HideUnconnectedTracks";
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
         void InstallHarmony() {
             if (!installed) {
                 Extensions.Log("HideUnconnectedTracks Patching...", true);
@@ -39,6 +43,7 @@ namespace HideUnconnectedTracks {
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         void UninstallHarmony() {
             if (installed) {
                 Harmony harmony = new Harmony(HarmonyId);
