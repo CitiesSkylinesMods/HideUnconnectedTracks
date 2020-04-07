@@ -25,14 +25,13 @@ namespace HideUnconnectedTracks {
 
         #region Harmony
         bool installed = false;
-        object HarmonyObject = null;
         const string HarmonyId = "CS.kian.HideUnconnectedTracks";
         void InstallHarmony() {
             if (!installed) {
                 Extensions.Log("HideUnconnectedTracks Patching...", true);
-//#if DEBUG
-//                HarmonyInstance.DEBUG = true;
-//#endif
+#if DEBUG
+                //HarmonyInstance.DEBUG = true;
+#endif
                 Harmony harmony = new Harmony(HarmonyId);
                 harmony.PatchAll(GetType().Assembly);
                 Extensions.Log("HideUnconnectedTracks Patching Completed!", true);
