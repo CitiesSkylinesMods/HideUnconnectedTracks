@@ -100,12 +100,14 @@
   <PropertyGroup>
     <PostBuildEvent>set "DEPLOYDIR=$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(TargetName)\"
 
-if not exist "%25DEPLOYDIR%25" mkdir "DEPLOYDIR%25"
-xcopy "$(TargetDir)CitiesHarmony.API.dll" "DEPLOYDIR%25" /y /e
+if not exist "%25DEPLOYDIR%25" mkdir "%25DEPLOYDIR%25"
+
+xcopy "$(TargetDir)CitiesHarmony.API.dll" "%25DEPLOYDIR%25" /y /e
 
 del "%25DEPLOYDIR%25$(TargetFileName)"
-xcopy "$(TargetDir)*.*" "%25DEPLOYDIR%25"  /y /e
+xcopy "$(TargetPath)" "%25DEPLOYDIR%25"  /y /e
 
-echo %25time%25</PostBuildEvent>
+echo %25time%25
+set "DEPLOYDIR="</PostBuildEvent>
   </PropertyGroup>
 </Project>
