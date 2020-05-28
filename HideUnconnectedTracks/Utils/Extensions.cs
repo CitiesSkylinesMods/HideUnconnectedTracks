@@ -9,6 +9,32 @@ using GenericGameBridge.Service;
 namespace HideUnconnectedTracks.Utils {
 
     public static class Extensions {
+        public static void CopyProperties(object target, object origin) {
+            FieldInfo[] fields = origin.GetType().GetFields();
+            foreach (FieldInfo fieldInfo in fields) {
+                //Extensions.Log($"Copying field:<{fieldInfo.Name}> ...>");
+                object value = fieldInfo.GetValue(origin);
+                string strValue = value?.ToString() ?? "null";
+                //Extensions.Log($"Got field value:<{strValue}> ...>");
+                fieldInfo.SetValue(target, value);
+                //Extensions.Log($"Copied field:<{fieldInfo.Name}> value:<{strValue}>");
+            }
+        }
+
+        public static void CopyProperties<T>(object target, object origin) {
+            Assert(target is T, "target is T");
+            Assert(origin is T, "origin is T");
+            FieldInfo[] fields = typeof(T).GetFields();
+            foreach (FieldInfo fieldInfo in fields) {
+                //Extensions.Log($"Copying field:<{fieldInfo.Name}> ...>");
+                object value = fieldInfo.GetValue(origin);
+                //string strValue = value?.ToString() ?? "null";
+                //Extensions.Log($"Got field value:<{strValue}> ...>");
+                fieldInfo.SetValue(target, value);
+                //Extensions.Log($"Copied field:<{fieldInfo.Name}> value:<{strValue}>");
+            }
+        }
+
         public static T Max<T>()
             where T : Enum =>
            System.Enum.GetValues(typeof(T)).Cast<T>().Max();

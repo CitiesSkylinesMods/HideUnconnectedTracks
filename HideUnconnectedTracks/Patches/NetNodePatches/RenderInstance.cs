@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace HideUnconnectedTracks.Patches.NetNodePatches {
     using Utils;
 
-    [HarmonyPatch()]
+    //[HarmonyPatch()]
     public static class RenderInstance {
         static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);
 

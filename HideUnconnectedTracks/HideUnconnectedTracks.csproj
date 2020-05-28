@@ -83,8 +83,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MeshTable.cs" />
     <Compile Include="KianMod.cs" />
+    <Compile Include="ObjUnity3D\Extensions\MeshExt.cs" />
+    <Compile Include="ObjUnity3D\Extensions\StringExt.cs" />
+    <Compile Include="ObjUnity3D\Extensions\Utils.cs" />
+    <Compile Include="ObjUnity3D\Extensions\Vector3Ext.cs" />
+    <Compile Include="ObjUnity3D\Extensions\Vector4Ext.cs" />
+    <Compile Include="ObjUnity3D\Int32Converter.cs" />
+    <Compile Include="ObjUnity3D\OBJData.cs" />
+    <Compile Include="ObjUnity3D\OBJFace.cs" />
+    <Compile Include="ObjUnity3D\OBJFaceVertex.cs" />
+    <Compile Include="ObjUnity3D\OBJGroup.cs" />
+    <Compile Include="ObjUnity3D\OBJLoader.cs" />
+    <Compile Include="ObjUnity3D\OBJMaterial.cs" />
     <Compile Include="Patches\NetNodePatches\checkTracksCommons.cs" />
+    <Compile Include="Patches\NetNodePatches\RefreshJunctionData.cs" />
     <Compile Include="Patches\NetNodePatches\RenderInstance.cs" />
     <Compile Include="Patches\TranspilerUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -95,6 +109,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\Train Track Node Left Track.obj" />
+    <EmbeddedResource Include="Resources\Train Track Node Right Track.obj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

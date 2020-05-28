@@ -216,5 +216,12 @@ namespace HideUnconnectedTracks.Patches {
             Log("\n" + insertion.IL2STR());
             Log("PEEK:\n" + codes.GetRange(index - 4, insertion.Length+12).IL2STR());
         }
+
+        /// <typeparam name="T">delegate type</typeparam>
+        /// <returns>Type[] represeting arguments of the delegate</returns>
+        internal static Type[] GetGenericArguments<T>() where T : Delegate {
+            T dummy = default;
+            return dummy.Method.GetGenericArguments();
+        }
     }
 }
