@@ -2,7 +2,6 @@ using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using ColossalFramework;
 
 namespace HideUnconnectedTracks.Patches {
     using System;
@@ -10,11 +9,11 @@ namespace HideUnconnectedTracks.Patches {
     using static TranspilerUtils;
     public static class CheckTracksCommons {
         public static bool ShouldConnectTracks(ushort nodeId)
-            //ushort nodeId,
-            //ref RenderManager.Instance data)
-            //ref RenderManager.Instance data,
-            //ref NetInfo.Node nodeInfo)
-        { 
+        //ushort nodeId,
+        //ref RenderManager.Instance data)
+        //ref RenderManager.Instance data,
+        //ref NetInfo.Node nodeInfo)
+        {
             Log._Debug("ShouldConnectTracks() called. (DetermineDirectConnect)");
 
             //ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
@@ -39,7 +38,7 @@ namespace HideUnconnectedTracks.Patches {
 
         static MethodInfo mShouldConnectTracks => typeof(CheckTracksCommons).GetMethod("ShouldConnectTracks") ?? throw new Exception("mShouldConnectTracks is null");
         static MethodInfo mCheckRenderDistance => typeof(RenderManager.CameraInfo).GetMethod("CheckRenderDistance") ?? throw new Exception("mCheckRenderDistance is null");
-        static FieldInfo  f_m_nodes => typeof(NetInfo).GetField("m_nodes");
+        static FieldInfo f_m_nodes => typeof(NetInfo).GetField("m_nodes");
 
         public static void ApplyCheckTracks(List<CodeInstruction> codes, MethodInfo method, int occurance) {
             /*
@@ -60,18 +59,18 @@ namespace HideUnconnectedTracks.Patches {
             int index = 0;
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Callvirt, mCheckRenderDistance), index, counter: occurance);
             Extensions.Assert(index != 0, "index!=0");
-            //CodeInstruction LDLoc_NodeInfoIDX = Search_LDLoc_NodeInfoIDX(codes, index, counter:1, dir:-1);
-            CodeInstruction LDLocA_NodeInfo = Build_LDLocA_NodeInfo(codes, index, counter: 1, dir: -1);
+            CodeInstruction LDLoc_NodeInfoIDX = Search_LDLoc_NodeInfoIDX(codes, index, counter: 1, dir: -1);
+            //CodeInstruction LDLocA_NodeInfo = Build_LDLocA_NodeInfo(codes, index, counter: 1, dir: -1);
 
             //seek to <ldarg.s cameraInfo> instruction:
-            index = SearchInstruction(codes, GetLDArg(method, "cameraInfo"), index, counter: occurance,dir:-1); 
+            index = SearchInstruction(codes, GetLDArg(method, "cameraInfo"), index, counter: occurance, dir: -1);
 
             Label ContinueIndex = GetContinueLabel(codes, index, dir: -1); // IL_029d: br IL_0570
             {
                 var newInstructions = new[]{
-                    LDArg_NodeID, 
+                    LDArg_NodeID,
+                    //LDLoc_NodeInfoIDX,
                     //LDArg_data,
-                    //LDLocA_NodeInfo,
                     new CodeInstruction(OpCodes.Call, mShouldConnectTracks),
                     new CodeInstruction(OpCodes.Brfalse, ContinueIndex), // if returned value is false then continue to the next iteration of for loop;
                 };
@@ -80,14 +79,14 @@ namespace HideUnconnectedTracks.Patches {
             } // end block
         } // end method
 
-        public static CodeInstruction Search_LDLoc_NodeInfoIDX(List<CodeInstruction> codes, int index, int counter , int dir) {
+        public static CodeInstruction Search_LDLoc_NodeInfoIDX(List<CodeInstruction> codes, int index, int counter, int dir) {
             Extensions.Assert(f_m_nodes != null, "f_m_nodes!=null failed");
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Ldfld, f_m_nodes), index, counter: counter, dir: dir);
 
             var code = codes[index + 1];
             Extensions.Assert(IsLdLoc(code), $"IsLdLoc(code) | code={code}");
             return code;
-            
+
         }
 
         public static CodeInstruction Build_LDLocA_NodeInfo(List<CodeInstruction> codes, int index, int counter, int dir) {
