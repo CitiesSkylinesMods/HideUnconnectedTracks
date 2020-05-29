@@ -3,6 +3,7 @@ using ObjUnity3D;
 using UnityEngine;
 
 namespace HideUnconnectedTracks {
+    using System.Collections;
     using System.Reflection;
     using Utils;
     public struct MeshTable {
@@ -19,6 +20,9 @@ namespace HideUnconnectedTracks {
     }
 
     public static class MeshTables {
+        public static Hashtable LUT = new Hashtable();
+
+
         public static MeshTable VanillaTrainTracks;
         public static MeshTable VanillaTrainWires;
 
@@ -45,6 +49,7 @@ namespace HideUnconnectedTracks {
 
             VanillaTrainTracks.StationDouble = StationTrack.m_nodes[1];
             VanillaTrainTracks.StationSingle = StationTrack.m_nodes[4];
+            LUT[VanillaTrainTracks.TwoWayDouble] = VanillaTrainTracks;
         }
 
         public static void GenerateVanillaTrainWires() {
@@ -54,7 +59,7 @@ namespace HideUnconnectedTracks {
             NetInfo StationTrack = GetInfo("Train Station Track");
             VanillaTrainWires.TwoWayDouble = DoubleTrack.m_nodes[3];
             VanillaTrainWires.OneSideEnd = CloneNodeInfo(VanillaTrainWires.TwoWayDouble);
-            VanillaTrainWires.OneSideEnd.m_nodeMesh.LoadMesh("Train Track Node Right Track.obj");
+            VanillaTrainWires.OneSideEnd.m_nodeMesh.LoadMesh("Train Track Node Right Track.obj"); // TODO fix
             VanillaTrainWires.OneSideStart = CloneNodeInfo(VanillaTrainWires.TwoWayDouble);
             VanillaTrainWires.OneSideStart.m_nodeMesh.LoadMesh("Train Track Node Left Track.obj");
 

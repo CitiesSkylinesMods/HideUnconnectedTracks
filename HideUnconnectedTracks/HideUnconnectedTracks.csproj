@@ -83,6 +83,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="DecompiledSources\Class1.cs" />
     <Compile Include="MeshTable.cs" />
     <Compile Include="KianMod.cs" />
     <Compile Include="ObjUnity3D\Extensions\MeshExt.cs" />

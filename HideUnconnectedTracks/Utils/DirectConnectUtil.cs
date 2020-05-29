@@ -1,5 +1,8 @@
  namespace HideUnconnectedTracks.Utils {
     using ColossalFramework;
+    using System;
+    using TrafficManager.Manager.Impl;
+    using UnityEngine.Networking.Types;
     using static HideUnconnectedTracks.Utils.Extensions;
 
     public static class DirectConnectUtil {
@@ -183,5 +186,127 @@
                 return false;
             }
         }
+
+        [Flags]
+        enum ConnectionT {
+            None=0,
+            Right = 1,
+            Left = 2,
+            Both=Right|Left,
+        }
+
+        internal static bool DetermineDirectConnect(
+            ushort segmentId1,
+            ushort segmentId2,
+            ushort nodeId,
+            ref NetInfo.Node nodeInfo) {
+            VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
+            if (!HasLane(segmentId1, vehicleType)) // vehicleType == 0 is also checked here
+                return true;
+            var nodeInfo2 = DetermineDirectConnect(
+                nodeInfo,
+                segmentId1,
+                segmentId2,
+                nodeId,
+                NetInfo.LaneType.All,
+                vehicleType);
+            if (nodeInfo2 == null)
+                return false;
+            nodeInfo = nodeInfo2;
+            return true;
+        }
+
+
+        /// <summary>
+        /// Precondition: assuming that the segments can have connected lanes.
+        /// </summary>
+        internal static NetInfo.Node DetermineDirectConnect(
+            NetInfo.Node nodeInfo,
+            ushort sourceSegmentId,
+            ushort targetSegmentId,
+            ushort nodeId,
+            NetInfo.LaneType laneType,
+            VehicleInfo.VehicleType vehicleType) {
+            NetInfo sourceInfo = sourceSegmentId.ToSegment().Info;
+            NetInfo targetInfo = targetSegmentId.ToSegment().Info;
+            Log._Debug("DetermineDirectConnect() called");
+
+
+            if (!LaneConnectionManager.Instance.HasNodeConnections(nodeId))
+                return nodeInfo;
+            if (targetInfo != sourceInfo)
+                return nodeInfo;
+            if (!MeshTables.LUT.ContainsKey(nodeInfo))
+                return nodeInfo;
+
+            ConnectionT connections = default;
+
+            bool sourceStartNode = (bool)netService.IsStartNode(sourceSegmentId, nodeId);
+            bool targetStartNode = (bool)netService.IsStartNode(sourceSegmentId, nodeId);
+            var sourceLaneInfos = sourceSegmentId.ToSegment().Info.m_lanes;
+            int nSource = sourceLaneInfos.Length;
+
+            var targetLaneInfos = targetSegmentId.ToSegment().Info.m_lanes;
+            int nTarget = targetLaneInfos.Length;
+
+            uint sourceLaneId, targetLaneId;
+            int sourceLaneIndex, targetLaneIndex;
+            for (sourceLaneIndex = 0, sourceLaneId = sourceSegmentId.ToSegment().m_lanes;
+                sourceLaneIndex < nSource;
+                ++sourceLaneIndex, sourceLaneId = sourceLaneId.ToLane().m_nextLane) {
+                //Extensions.Log($"sourceLaneId={sourceLaneId} {sourceLaneInfos[sourceLaneIndex].m_laneType} & {laneType} = {sourceLaneInfos[sourceLaneIndex].m_laneType & laneType}\n" +
+                //    $"{sourceLaneInfos[sourceLaneIndex].m_vehicleType} & {vehicleType} = {sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType}");
+
+                if ((sourceLaneInfos[sourceLaneIndex].m_laneType & laneType) == 0 ||
+                    (sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType) == 0) {
+                    continue;
+                }
+                //Extensions.Log($"POINT A> ");
+                for (targetLaneIndex = 0, targetLaneId = targetSegmentId.ToSegment().m_lanes;
+                    targetLaneIndex < nTarget;
+                    ++targetLaneIndex, targetLaneId = targetLaneId.ToLane().m_nextLane) {
+                    //Extensions.Log($"targetLaneId={targetLaneId} {targetLaneInfos[targetLaneIndex].m_laneType} & {laneType} = {targetLaneInfos[targetLaneIndex].m_laneType & laneType}\n" +
+                    //    $"{targetLaneInfos[targetLaneIndex].m_vehicleType} & {vehicleType} = {targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType}");
+                    if ((targetLaneInfos[targetLaneIndex].m_laneType & laneType) == 0 ||
+                        (targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType) == 0) {
+                        continue;
+                    }
+
+                    bool connected = AreLanesConnected(
+                        sourceSegmentId, sourceLaneId, (byte)sourceLaneIndex,
+                        targetSegmentId, targetLaneId, (byte)targetLaneIndex,
+                        nodeId);
+
+                    //Log($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} connected={connected}");
+                    if (connected) {
+                        var dir1 = sourceLaneInfos[sourceLaneIndex].m_direction;
+                        if(dir1 == NetInfo.Direction.Forward)
+                            connections |= ConnectionT.Right;
+                        else
+                            connections |= ConnectionT.Left;
+                    }
+                }
+            }
+
+
+            var table = (MeshTable)MeshTables.LUT[nodeInfo];
+
+            Log._Debug($"DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId}" +
+                $"nodeInfo.m_connectGroup={nodeInfo.m_connectGroup}\n =>" +
+                $"connections={connections}");
+
+            switch (connections) {
+                case ConnectionT.Left:
+                    return table.OneSideStart;
+                case ConnectionT.Right:
+                    return table.OneSideEnd;
+                case ConnectionT.None:
+                    return null;
+                case ConnectionT.Both:
+                    return nodeInfo;
+            }
+            throw new Exception("unreachable code");
+        }
+
     }
 }
