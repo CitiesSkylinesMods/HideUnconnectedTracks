@@ -84,8 +84,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DecompiledSources\Class1.cs" />
+    <Compile Include="LifeCycle\LifeCycle.cs" />
+    <Compile Include="LifeCycle\LoadingExtension.cs" />
     <Compile Include="MeshTable.cs" />
-    <Compile Include="KianMod.cs" />
+    <Compile Include="LifeCycle\KianMod.cs" />
     <Compile Include="ObjUnity3D\Extensions\MeshExt.cs" />
     <Compile Include="ObjUnity3D\Extensions\StringExt.cs" />
     <Compile Include="ObjUnity3D\Extensions\Utils.cs" />

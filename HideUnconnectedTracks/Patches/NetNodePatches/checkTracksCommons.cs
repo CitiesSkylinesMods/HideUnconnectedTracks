@@ -8,31 +8,27 @@ namespace HideUnconnectedTracks.Patches {
     using Utils;
     using static TranspilerUtils;
     public static class CheckTracksCommons {
-        public static bool ShouldConnectTracks(ushort nodeId)
-        //ushort nodeId,
-        //ref RenderManager.Instance data)
-        //ref RenderManager.Instance data,
-        //ref NetInfo.Node nodeInfo)
-        {
-            Log._Debug("ShouldConnectTracks() called. (DetermineDirectConnect)");
-
-            //ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
-            //int targetSegmentIDX = data.m_dataInt0 >> 4;
-            //ushort targetSegmentID = nodeId.ToNode().GetSegment(targetSegmentIDX);
-            //if (TMPEUTILS.exists) {
-            //    try {
-            //        return DirectConnectUtil.DetermineDirectConnect(
-            //            sourceSegmentID,
-            //            targetSegmentID,
-            //            nodeId,
-            //            ref nodeInfo);
-            //    }
-            //    catch (Exception e){
-            //        Log.Error(e.Message);
-            //        TMPEUTILS.exists = false;
-            //        throw;
-            //    }
-            //}
+        public static bool ShouldConnectTracks(
+        ushort nodeId,
+        ref RenderManager.Instance data,
+        ref NetInfo.Node nodeInfo) {
+            ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
+            int targetSegmentIDX = data.m_dataInt0 >> 4;
+            ushort targetSegmentID = nodeId.ToNode().GetSegment(targetSegmentIDX);
+            if (TMPEUTILS.exists) {
+                try {
+                    return DirectConnectUtil.DetermineDirectConnect(
+                        sourceSegmentID,
+                        targetSegmentID,
+                        nodeId,
+                        ref nodeInfo);
+                }
+                catch (Exception e) {
+                    Log.Error(e.Message);
+                    TMPEUTILS.exists = false;
+                    throw;
+                }
+            }
             return true;
         }
 
@@ -60,7 +56,7 @@ namespace HideUnconnectedTracks.Patches {
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Callvirt, mCheckRenderDistance), index, counter: occurance);
             Extensions.Assert(index != 0, "index!=0");
             CodeInstruction LDLoc_NodeInfoIDX = Search_LDLoc_NodeInfoIDX(codes, index, counter: 1, dir: -1);
-            //CodeInstruction LDLocA_NodeInfo = Build_LDLocA_NodeInfo(codes, index, counter: 1, dir: -1);
+            CodeInstruction LDLocA_NodeInfo = Build_LDLocA_NodeInfo(codes, index, counter: 1, dir: -1);
 
             //seek to <ldarg.s cameraInfo> instruction:
             index = SearchInstruction(codes, GetLDArg(method, "cameraInfo"), index, counter: occurance, dir: -1);
@@ -69,8 +65,8 @@ namespace HideUnconnectedTracks.Patches {
             {
                 var newInstructions = new[]{
                     LDArg_NodeID,
-                    //LDLoc_NodeInfoIDX,
-                    //LDArg_data,
+                    LDArg_data,
+                    LDLocA_NodeInfo,
                     new CodeInstruction(OpCodes.Call, mShouldConnectTracks),
                     new CodeInstruction(OpCodes.Brfalse, ContinueIndex), // if returned value is false then continue to the next iteration of for loop;
                 };
@@ -95,8 +91,7 @@ namespace HideUnconnectedTracks.Patches {
             var code = codes[index + 3];
 
             Extensions.Assert(code.IsStloc(), $"IsStLoc(code) | code={code}");
-            code.opcode = OpCodes.Ldloca_S;
-            return code;
+            return new CodeInstruction(OpCodes.Ldloca_S, code.operand);
         }
 
     }

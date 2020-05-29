@@ -5,23 +5,24 @@ using HideUnconnectedTracks.Utils;
 using CitiesHarmony.API;
 using System.Runtime.CompilerServices;
 
-namespace HideUnconnectedTracks {
+namespace HideUnconnectedTracks.LifeCycle {
     public class KianModInfo : IUserMod {
         public string Name => "RM Unconnected Tracks ";
         public string Description => "Automatically hide unconnected track textures";
 
         [UsedImplicitly]
         [MethodImpl(MethodImplOptions.NoInlining)]
+
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
-            HarmonyHelper.DoOnHarmonyReady(InstallHarmony); 
-            LoadingManager.instance.m_levelPreLoaded += TMPEUTILS.Init;
-            TMPEUTILS.Init();
+            HarmonyHelper.DoOnHarmonyReady(InstallHarmony);
+            if (Extensions.InGame)
+                LifeCycle.Load();
         }
 
         [UsedImplicitly]
         public void OnDisabled() {
-            LoadingManager.instance.m_levelPreLoaded -= TMPEUTILS.Init;
+            LifeCycle.Release();
             UninstallHarmony();
         }
 

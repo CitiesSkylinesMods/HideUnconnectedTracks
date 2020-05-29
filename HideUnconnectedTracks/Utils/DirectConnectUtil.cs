@@ -229,16 +229,18 @@
             VehicleInfo.VehicleType vehicleType) {
             NetInfo sourceInfo = sourceSegmentId.ToSegment().Info;
             NetInfo targetInfo = targetSegmentId.ToSegment().Info;
-            Log._Debug("DetermineDirectConnect() called");
+            Log._Debug($"DetermineDirectConnect(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
 
 
             if (!LaneConnectionManager.Instance.HasNodeConnections(nodeId))
                 return nodeInfo;
+            //Log._Debug("Point A");
             if (targetInfo != sourceInfo)
                 return nodeInfo;
+            Log._Debug("Point B");
             if (!MeshTables.LUT.ContainsKey(nodeInfo))
                 return nodeInfo;
-
+            Log._Debug("Point C");
             ConnectionT connections = default;
 
             bool sourceStartNode = (bool)netService.IsStartNode(sourceSegmentId, nodeId);
