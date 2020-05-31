@@ -83,10 +83,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="DecompiledSources\Class1.cs" />
+    <None Include="DecompiledSources\NetNode_.cs" />
     <Compile Include="LifeCycle\LifeCycle.cs" />
     <Compile Include="LifeCycle\LoadingExtension.cs" />
-    <Compile Include="MeshTable.cs" />
+    <Compile Include="NodeInfoLUT.cs" />
     <Compile Include="LifeCycle\KianMod.cs" />
     <Compile Include="ObjUnity3D\Extensions\MeshExt.cs" />
     <Compile Include="ObjUnity3D\Extensions\StringExt.cs" />
@@ -105,15 +105,18 @@
     <Compile Include="Patches\NetNodePatches\RenderInstance.cs" />
     <Compile Include="Patches\TranspilerUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\MeshUtil.cs" />
     <Compile Include="Utils\DirectConnectUtil.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\Log.cs" />
+    <Compile Include="Utils\NetUtil.cs" />
     <Compile Include="Utils\TMPEUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <EmbeddedResource Include="Resources\Train Track Node Left Track.obj" />
-    <EmbeddedResource Include="Resources\Train Track Node Right Track.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -8,7 +8,7 @@ namespace HideUnconnectedTracks.LifeCycle
         {
             Log.Info("LifeCycle.Load() called");
             TMPEUTILS.Init();
-            MeshTables.GenerateVanillaTrainTracks();
+            NodeInfoLUT.GenerateVanillaTrainLUT();
         }
 
         public static void Release()
