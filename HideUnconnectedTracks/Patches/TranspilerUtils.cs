@@ -169,6 +169,10 @@ namespace HideUnconnectedTracks.Patches {
             return index;
         }
 
+        /// <summary>
+        /// continue command is in form of branch into the end of for loop.
+        /// retrieves the operand of a branch instruction.
+        /// </summary>
         public static Label GetContinueLabel(List<CodeInstruction> codes, int index, int counter = 1, int dir = -1) {
             // continue command is in form of branch into the end of for loop.
             index = SearchGeneric(codes, idx => IsBR32(codes[idx].opcode), index, dir: dir, counter: counter);

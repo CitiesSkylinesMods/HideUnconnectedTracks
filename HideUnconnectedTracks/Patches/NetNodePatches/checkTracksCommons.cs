@@ -24,8 +24,8 @@ namespace HideUnconnectedTracks.Patches {
                         targetSegmentID,
                         nodeId,
                         ref nodeInfo,
-                        out bool fipMesh);
-                    if (fipMesh) {
+                        out bool flipMesh);
+                    if (flipMesh) {
                         dataVector0.x = -dataVector0.x;
                         dataVector0.y = -dataVector0.y;
                     }

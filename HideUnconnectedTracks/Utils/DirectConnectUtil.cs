@@ -24,6 +24,12 @@ namespace HideUnconnectedTracks.Utils {
         public static bool HasLane(ushort segmentID, VehicleInfo.VehicleType vehicleType) =>
              (segmentID.ToSegment().Info.m_vehicleTypes & vehicleType) != 0;
 
+        public const NetInfo.ConnectGroup DOUBLE =
+            NetInfo.ConnectGroup.DoubleMetro | NetInfo.ConnectGroup.DoubleMonorail | NetInfo.ConnectGroup.DoubleTrain;
+        public const NetInfo.ConnectGroup SINGLE =
+            NetInfo.ConnectGroup.SingleMetro | NetInfo.ConnectGroup.SingleMonorail | NetInfo.ConnectGroup.SingleTrain;
+        public const NetInfo.ConnectGroup STATION =
+            NetInfo.ConnectGroup.MetroStation | NetInfo.ConnectGroup.MonorailStation | NetInfo.ConnectGroup.TrainStation;
         public const NetInfo.ConnectGroup TRAM =
             NetInfo.ConnectGroup.CenterTram |
             NetInfo.ConnectGroup.NarrowTram |
@@ -63,13 +69,14 @@ namespace HideUnconnectedTracks.Utils {
 
 
 
-            internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.ConnectGroup flags) {
+            internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.ConnectGroup flags, NetInfo info=null) {
             VehicleInfo.VehicleType ret = 0;
+            if (info!=null  && (info.m_netAI is MetroTrackBaseAI))
+                return VehicleInfo.VehicleType.Metro; //MOM workaround
 
 
             if ((flags & TRAM) != 0) {
                 ret |= VehicleInfo.VehicleType.Tram;
-                // ret |= VehicleInfo.VehicleType.Metro; // MOM - not necessary since sunset harbour (?)
             }
             if ((flags & METRO) != 0) {
                 ret |= VehicleInfo.VehicleType.Metro;
@@ -231,7 +238,7 @@ namespace HideUnconnectedTracks.Utils {
             ref NetInfo.Node nodeInfo,
             out bool flipMesh) {
             flipMesh = false;
-            VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
+            VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup, nodeId.ToNode().Info);
             if (!HasLane(segmentId1, vehicleType)) // vehicleType == 0 is also checked here
                 return true;
             var nodeInfo2 = DetermineDirectConnect(
@@ -386,9 +393,6 @@ namespace HideUnconnectedTracks.Utils {
                     return nodeInfo;
             }
         }
-
-
-
     }
 }
 
