@@ -1,4 +1,5 @@
 using System;
+using static HideUnconnectedTracks.Utils.DirectConnectUtil;
 
 namespace HideUnconnectedTracks {
     using ColossalFramework;
@@ -43,15 +44,6 @@ namespace HideUnconnectedTracks {
     }
 
     public static class NodeInfoLUT {
-        public const NetInfo.ConnectGroup DOUBLE =
-            NetInfo.ConnectGroup.DoubleMetro | NetInfo.ConnectGroup.DoubleMonorail | NetInfo.ConnectGroup.DoubleTrain;
-
-        public const NetInfo.ConnectGroup SINGLE =
-            NetInfo.ConnectGroup.SingleMetro | NetInfo.ConnectGroup.SingleMonorail | NetInfo.ConnectGroup.SingleTrain;
-
-        public const NetInfo.ConnectGroup STATION =
-            NetInfo.ConnectGroup.MetroStation | NetInfo.ConnectGroup.MonorailStation | NetInfo.ConnectGroup.TrainStation;
-
         public static Hashtable LUT = new Hashtable();
         public static NodeInfoFamily VanillaTrainTracks;
         public static NodeInfoFamily VanillaTrainWires;
@@ -102,13 +94,24 @@ namespace HideUnconnectedTracks {
                     } else {
                         throw new Exception("unexpected info.m_connectGroup=" + info.m_connectGroup);
                     }
-
-
                 }// for each nodeInfo
             } //foreach info
             wires.GenerateExtraMeshes();
             tracks.GenerateExtraMeshes();
         }
+
+
+        public enum TrackType {
+            Track = 0,
+            Wire = 1,
+        }
+
+
+
+
+
+
+
 
         public static void GenerateVanillaTrainLUT() {
             NetInfo DoubleTrack = GetInfo("Train Track");
