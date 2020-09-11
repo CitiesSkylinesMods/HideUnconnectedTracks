@@ -24,6 +24,19 @@ namespace HideUnconnectedTracks.Utils {
         public static bool HasLane(ushort segmentID, VehicleInfo.VehicleType vehicleType) =>
              (segmentID.ToSegment().Info.m_vehicleTypes & vehicleType) != 0;
 
+        public static bool IsMedian(NetInfo.Node nodeInfo, NetInfo info) {
+            VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
+            return !info.m_vehicleTypes.IsFlagSet(vehicleType); // vehicleType == 0 => median
+        }
+
+        public static bool IsTrack(NetInfo.Node nodeInfo, NetInfo info) {
+            VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
+            return info.m_vehicleTypes.IsFlagSet(vehicleType); // vehicleType == 0 is checked here.
+        }
+
+
+
+        // TODO add wide narrow center single for tram and trolly
         public const NetInfo.ConnectGroup DOUBLE =
             NetInfo.ConnectGroup.DoubleMetro | NetInfo.ConnectGroup.DoubleMonorail | NetInfo.ConnectGroup.DoubleTrain;
         public const NetInfo.ConnectGroup SINGLE =
@@ -53,8 +66,6 @@ namespace HideUnconnectedTracks.Utils {
             NetInfo.ConnectGroup.SingleTrolleybus |
             NetInfo.ConnectGroup.WideTrolleybus;
 
-
-
         public static NetInfo.ConnectGroup GetConnectGroups(this ConnectType connectType) {
             switch (connectType) {
                 case ConnectType.Train: return TRAIN;
@@ -67,13 +78,10 @@ namespace HideUnconnectedTracks.Utils {
             }
         }
 
-
-
-            internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.ConnectGroup flags, NetInfo info=null) {
+        internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.ConnectGroup flags, NetInfo info = null) {
             VehicleInfo.VehicleType ret = 0;
-            if (info!=null  && (info.m_netAI is MetroTrackBaseAI))
+            if (info != null && (info.m_netAI is MetroTrackBaseAI))
                 return VehicleInfo.VehicleType.Metro; //MOM workaround
-
 
             if ((flags & TRAM) != 0) {
                 ret |= VehicleInfo.VehicleType.Tram;
@@ -305,7 +313,7 @@ namespace HideUnconnectedTracks.Utils {
                 vehicleType: vehicleType).ToArray();
 
             bool singleSource = sourceLanes.Length == 1;
-            bool singleTarget = targetLanes.Length == 1;
+            bool isTargetSingle = targetLanes.Length == 1;
 
             for (int i = 0; i < sourceLanes.Length; ++i) {
                 for (int j = 0; j < targetLanes.Length; ++j) {
@@ -332,7 +340,7 @@ namespace HideUnconnectedTracks.Utils {
                         //        $" target : {targetRight} = {targetStartNode} == !{targetInvert} == !{targetSmallerPos}");
 
 
-                        if (singleTarget) {
+                        if (isTargetSingle) {
                             if (sourceRight)
                                 connections |= ConnectionT.Right;
                             else
@@ -357,12 +365,11 @@ namespace HideUnconnectedTracks.Utils {
             }
 
             var table = (NodeInfoFamily)NodeInfoLUT.LUT[nodeInfo];
-
             //Log._Debug($"DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
             //    $"nodeInfo.m_connectGroup={nodeInfo.m_connectGroup}\n =>" +
             //    $"connections={connections}");
 
-            if (singleTarget) {
+            if (isTargetSingle) {
                 switch (connections) {
                     case ConnectionT.None:
                         return null;
