@@ -11,7 +11,8 @@ namespace HideUnconnectedTracks.Utils {
         Metro,
         Monorail,
         Tram,
-        Trolly
+        Trolly,
+        All,
     }
 
     public static class DirectConnectUtil {
@@ -79,6 +80,7 @@ namespace HideUnconnectedTracks.Utils {
                 case ConnectType.Trolly: return TROLLY;
                 case ConnectType.Tram: return TRAM;
                 case ConnectType.None: return NetInfo.ConnectGroup.None;
+                case ConnectType.All: return TRAIN | METRO | MONORAIL | TROLLY | TRAM;
                 default: throw new Exception("Unreachable code");
             }
         }
