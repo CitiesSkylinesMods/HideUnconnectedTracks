@@ -108,7 +108,7 @@ namespace HideUnconnectedTracks {
                             family.OneWayStart = nodeInfo;
                         } else if (oneway == NetInfo.ConnectGroup.OnewayEnd) {
                             Assert(nodeInfo.m_connectGroup.IsFlagSet(DOUBLE), "(OnewayEnd) unexpected nodeInfo.m_connectGroup=" + info.m_connectGroup);
-                            family.OneWayStart = nodeInfo;
+                            family.OneWayEnd = nodeInfo;
                         } else if (oneway == NetInfo.ConnectGroup.Oneway) {
                             Assert(nodeInfo.m_connectGroup.IsFlagSet(SINGLE), "(Oneway) unexpected nodeInfo.m_connectGroup=" + info.m_connectGroup);
                             family.OneWay = nodeInfo;
@@ -158,6 +158,39 @@ namespace HideUnconnectedTracks {
             VanillaTrainTracks = tracks;
             VanillaTrainWires = wires;
         }
+
+        public static void GenerateVanillaTracks() {
+            NetInfo DoubleTrack = GetInfo("Train Track");
+            NetInfo OnewayTrack = GetInfo("Train Oneway Track");
+            NetInfo StationTrack = GetInfo("Train Station Track");
+            NetInfo CargoStationTrack = GetInfo("Train Cargo Track", false)
+                ?? GetInfo("Cargo Train Station Track");
+
+            var infos = new[] { DoubleTrack, OnewayTrack, StationTrack };
+            CreateFamily(infos, ConnectType.Train, out var tracks, out var wires);
+            tracks.GenerateExtraMeshes();
+            wires.GenerateExtraMeshes();
+            LUT[tracks.StationDouble] = LUT[tracks.TwoWayDouble] = LUT[tracks.StationSingle] = tracks;
+            LUT[wires.StationDouble] = LUT[wires.TwoWayDouble] = LUT[wires.StationSingle] = wires;
+
+            infos = new[] { CargoStationTrack };
+            CreateFamily(infos, ConnectType.Train, out var cargotracks, out var cargowires);
+            cargotracks.FillInTheBlanks(tracks);
+            cargowires.FillInTheBlanks(wires);
+
+            LUT[cargotracks.StationDouble] = cargotracks;
+            LUT[cargowires.StationDouble] = cargowires;
+
+            VanillaTrainTracks = tracks;
+            VanillaTrainWires = wires;
+        }
+        // TODO
+        // BP elevated train station (normal)
+        // "Medium Road Monorail Station" "Monorail Station Track" "Monorail Track" "Monorail Oneway Track"
+        // "Metro Station Track Ground 01" "Metro Track Ground 01"
+        // "Metro Station Track Elevated 01" "Metro Track Elevated 01"
+
+
 
         public static void GenerateCustomDoubleTrackLUT() {
             int n = PrefabCollection<NetInfo>.LoadedCount();

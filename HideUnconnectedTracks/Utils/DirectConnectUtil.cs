@@ -34,19 +34,24 @@ namespace HideUnconnectedTracks.Utils {
             return info.m_vehicleTypes.IsFlagSet(vehicleType); // vehicleType == 0 is checked here.
         }
 
-
-
         // TODO add wide narrow center single for tram and trolly
         public const NetInfo.ConnectGroup DOUBLE =
-            NetInfo.ConnectGroup.DoubleMetro | NetInfo.ConnectGroup.DoubleMonorail | NetInfo.ConnectGroup.DoubleTrain;
+            NetInfo.ConnectGroup.DoubleMetro | NetInfo.ConnectGroup.DoubleMonorail | NetInfo.ConnectGroup.DoubleTrain |
+            NetInfo.ConnectGroup.NarrowTram | NetInfo.ConnectGroup.WideTram |
+            NetInfo.ConnectGroup.NarrowTrolleybus | NetInfo.ConnectGroup.WideTrolleybus;
+
         public const NetInfo.ConnectGroup SINGLE =
-            NetInfo.ConnectGroup.SingleMetro | NetInfo.ConnectGroup.SingleMonorail | NetInfo.ConnectGroup.SingleTrain;
+            NetInfo.ConnectGroup.SingleMetro | NetInfo.ConnectGroup.SingleMonorail | NetInfo.ConnectGroup.SingleTrain |
+            NetInfo.ConnectGroup.CenterTram | NetInfo.ConnectGroup.SingleTram |
+            NetInfo.ConnectGroup.CenterTrolleybus | NetInfo.ConnectGroup.SingleTrolleybus;
+
         public const NetInfo.ConnectGroup STATION =
             NetInfo.ConnectGroup.MetroStation | NetInfo.ConnectGroup.MonorailStation | NetInfo.ConnectGroup.TrainStation;
+
         public const NetInfo.ConnectGroup TRAM =
             NetInfo.ConnectGroup.CenterTram |
-            NetInfo.ConnectGroup.NarrowTram |
             NetInfo.ConnectGroup.SingleTram |
+            NetInfo.ConnectGroup.NarrowTram |
             NetInfo.ConnectGroup.WideTram;
         public const NetInfo.ConnectGroup TRAIN =
             NetInfo.ConnectGroup.DoubleTrain |
@@ -62,8 +67,8 @@ namespace HideUnconnectedTracks.Utils {
             NetInfo.ConnectGroup.MetroStation;
         public const NetInfo.ConnectGroup TROLLY =
             NetInfo.ConnectGroup.CenterTrolleybus |
-            NetInfo.ConnectGroup.NarrowTrolleybus |
             NetInfo.ConnectGroup.SingleTrolleybus |
+            NetInfo.ConnectGroup.NarrowTrolleybus |
             NetInfo.ConnectGroup.WideTrolleybus;
 
         public static NetInfo.ConnectGroup GetConnectGroups(this ConnectType connectType) {
