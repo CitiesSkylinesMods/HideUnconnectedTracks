@@ -1,7 +1,7 @@
 namespace HideUnconnectedTracks.LifeCycle
 {
     using ICities;
-    using HideUnconnectedTracks.Utils; using KianCommons;
+    using KianCommons;
 
     public class LoadingExtention : LoadingExtensionBase
     {

@@ -117,6 +117,7 @@
     <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJGroup.cs" />
     <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJLoader.cs" />
     <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJMaterial.cs" />
+    <Compile Include="KianCommons\KianCommons\Patches\HarmonyUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\GridUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\HelpersExtensions.cs" />
     <Compile Include="KianCommons\KianCommons\Util\Log.cs" />
