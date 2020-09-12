@@ -1,7 +1,7 @@
 using HarmonyLib;
 using ICities;
 using JetBrains.Annotations;
-using HideUnconnectedTracks.Utils;
+using HideUnconnectedTracks.Utils; using KianCommons;
 using CitiesHarmony.API;
 using System.Runtime.CompilerServices;
 
@@ -16,7 +16,7 @@ namespace HideUnconnectedTracks.LifeCycle {
         public void OnEnabled() {
             System.IO.File.WriteAllText("mod.debug.log", ""); // restart log.
             HarmonyHelper.DoOnHarmonyReady(InstallHarmony);
-            if (Extensions.InGame)
+            if (HelpersExtensions.InGame)
                 LifeCycle.Load();
         }
 
@@ -33,13 +33,13 @@ namespace HideUnconnectedTracks.LifeCycle {
         [MethodImpl(MethodImplOptions.NoInlining)]
         void InstallHarmony() {
             if (!installed) {
-                Extensions.Log("HideUnconnectedTracks Patching...", true);
+                Log.Debug("HideUnconnectedTracks Patching...", true);
 #if DEBUG
                 //HarmonyInstance.DEBUG = true;
 #endif
                 Harmony harmony = new Harmony(HarmonyId);
                 harmony.PatchAll(GetType().Assembly);
-                Extensions.Log("HideUnconnectedTracks Patching Completed!", true);
+                Log.Debug("HideUnconnectedTracks Patching Completed!", true);
                 installed = true;
             }
         }
@@ -49,7 +49,7 @@ namespace HideUnconnectedTracks.LifeCycle {
             if (installed) {
                 Harmony harmony = new Harmony(HarmonyId);
                 harmony.UnpatchAll(HarmonyId);
-                Extensions.Log("HideUnconnectedTracks patches Reverted.", true);
+                Log.Debug("HideUnconnectedTracks patches Reverted.", true);
                 installed = false;
             }
         }

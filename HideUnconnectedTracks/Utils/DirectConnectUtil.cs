@@ -3,7 +3,8 @@ namespace HideUnconnectedTracks.Utils {
     using System;
     using System.Linq;
     using TrafficManager.Manager.Impl;
-    using static HideUnconnectedTracks.Utils.Extensions;
+    using KianCommons;
+    using static KianCommons.NetUtil;
 
     public enum ConnectType {
         None,
@@ -151,7 +152,7 @@ namespace HideUnconnectedTracks.Utils {
             ushort nodeId,
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType) {
-            bool sourceStartNode = (bool)netService.IsStartNode(sourceSegmentId, nodeId);
+            bool sourceStartNode = IsStartNode(sourceSegmentId, nodeId);
             var sourceLaneInfos = sourceSegmentId.ToSegment().Info.m_lanes;
             int nSource = sourceLaneInfos.Length;
 
@@ -163,18 +164,18 @@ namespace HideUnconnectedTracks.Utils {
             for (sourceLaneIndex = 0, sourceLaneId = sourceSegmentId.ToSegment().m_lanes;
                 sourceLaneIndex < nSource;
                 ++sourceLaneIndex, sourceLaneId = sourceLaneId.ToLane().m_nextLane) {
-                //Extensions.Log($"sourceLaneId={sourceLaneId} {sourceLaneInfos[sourceLaneIndex].m_laneType} & {laneType} = {sourceLaneInfos[sourceLaneIndex].m_laneType & laneType}\n" +
+                //Log.Debug($"sourceLaneId={sourceLaneId} {sourceLaneInfos[sourceLaneIndex].m_laneType} & {laneType} = {sourceLaneInfos[sourceLaneIndex].m_laneType & laneType}\n" +
                 //    $"{sourceLaneInfos[sourceLaneIndex].m_vehicleType} & {vehicleType} = {sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType}");
 
                 if ((sourceLaneInfos[sourceLaneIndex].m_laneType & laneType) == 0 ||
                     (sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType) == 0) {
                     continue;
                 }
-                //Extensions.Log($"POINT A> ");
+                //Log.Debug($"POINT A> ");
                 for (targetLaneIndex = 0, targetLaneId = targetSegmentId.ToSegment().m_lanes;
                     targetLaneIndex < nTarget;
                     ++targetLaneIndex, targetLaneId = targetLaneId.ToLane().m_nextLane) {
-                    //Extensions.Log($"targetLaneId={targetLaneId} {targetLaneInfos[targetLaneIndex].m_laneType} & {laneType} = {targetLaneInfos[targetLaneIndex].m_laneType & laneType}\n" +
+                    //Log.Debug($"targetLaneId={targetLaneId} {targetLaneInfos[targetLaneIndex].m_laneType} & {laneType} = {targetLaneInfos[targetLaneIndex].m_laneType & laneType}\n" +
                     //    $"{targetLaneInfos[targetLaneIndex].m_vehicleType} & {vehicleType} = {targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType}");
                     if ((targetLaneInfos[targetLaneIndex].m_laneType & laneType) == 0 ||
                         (targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType) == 0) {
@@ -200,8 +201,8 @@ namespace HideUnconnectedTracks.Utils {
             ushort segmentId1, uint laneId1, byte laneIndex1,
             ushort segmentId2, uint laneId2, byte laneIndex2,
             ushort nodeId) {
-            bool startNode1 = (bool)netService.IsStartNode(segmentId1, nodeId);
-            bool startNode2 = (bool)netService.IsStartNode(segmentId2, nodeId);
+            bool startNode1 = (bool)NetUtil.IsStartNode(segmentId1, nodeId);
+            bool startNode2 = (bool)NetUtil.IsStartNode(segmentId2, nodeId);
             TMPEUTILS.GetLaneEndPoint(
                 segmentId1,
                 startNode1,
@@ -284,7 +285,7 @@ namespace HideUnconnectedTracks.Utils {
             flipMesh = false;
             NetInfo sourceInfo = sourceSegmentId.ToSegment().Info;
             NetInfo targetInfo = targetSegmentId.ToSegment().Info;
-            //Log._Debug($"DetermineDirectConnect(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
+            //Log.Debug($"DetermineDirectConnect(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
 
             if (!LaneConnectionManager.Instance.HasNodeConnections(nodeId))
                 return nodeInfo;
@@ -304,9 +305,9 @@ namespace HideUnconnectedTracks.Utils {
 
             ConnectionT connections = default;
 
-            bool sourceStartNode = (bool)netService.IsStartNode(sourceSegmentId, nodeId);
+            bool sourceStartNode = IsStartNode(sourceSegmentId, nodeId);
             bool sourceInvert = sourceSegmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-            bool targetStartNode = (bool)netService.IsStartNode(targetSegmentId, nodeId);
+            bool targetStartNode = IsStartNode(targetSegmentId, nodeId);
             bool targetInvert = targetSegmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
 
             var sourceLanes = NetUtil.IterateLanes(
@@ -341,7 +342,7 @@ namespace HideUnconnectedTracks.Utils {
                         bool targetSmallerPos = targetLane.LaneInfo.m_position < otherTargetLane.LaneInfo.m_position;
                         bool targetRight = targetStartNode == !targetInvert == !targetSmallerPos;
                         //if (sourceRight != targetRight)
-                        //    Log._Debug($"DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
+                        //    Log.Debug($"DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
                         //        $"nodeInfo.m_connectGroup={nodeInfo.m_connectGroup} =>\n" +
                         //        $" source : {sourceRight} = {sourceStartNode} == !{sourceInvert} == {sourceSmallerPos}\n" +
                         //        $" target : {targetRight} = {targetStartNode} == !{targetInvert} == !{targetSmallerPos}");
@@ -372,9 +373,9 @@ namespace HideUnconnectedTracks.Utils {
             }
 
             var table = (NodeInfoFamily)NodeInfoLUT.LUT[nodeInfo];
-            //Log._Debug($"DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
+            //Log.Debug($"[P0] DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
             //    $"nodeInfo.m_connectGroup={nodeInfo.m_connectGroup}\n =>" +
-            //    $"connections={connections}");
+            //    $"connections={connections} isTargetSingle={isTargetSingle}");
 
             if (isTargetSingle) {
                 switch (connections) {
@@ -397,13 +398,15 @@ namespace HideUnconnectedTracks.Utils {
                 case ConnectionT.Left:
                     return table.TwoWayLeft;
                 case ConnectionT.Right:
+                    Log.Debug("return table.TwoWayRight;");
                     return table.TwoWayRight;
                 case ConnectionT.Both:
                     return table.TwoWayDouble;
+
                 default: // criss cross
-                    Log._Debug($"DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
-                        $"nodeInfo.m_connectGroup={nodeInfo.m_connectGroup}\n =>" +
-                        $"connections={connections}");
+                    //Log.Debug($"DetermineDirectConnect[P1]: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
+                    //    $"nodeInfo.m_connectGroup={nodeInfo.m_connectGroup}\n =>" +
+                    //    $"connections={connections}");
                     return nodeInfo;
             }
         }

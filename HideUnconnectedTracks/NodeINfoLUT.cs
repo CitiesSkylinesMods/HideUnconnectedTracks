@@ -1,12 +1,16 @@
 using System;
 using static HideUnconnectedTracks.Utils.DirectConnectUtil;
+using System.Linq;
+using ObjUnity3D;
+using System.IO;
 
 namespace HideUnconnectedTracks {
     using ColossalFramework;
     using System.Collections;
     using System.Collections.Generic;
-    using Utils;
-    using static Utils.Extensions;
+    using Utils; using KianCommons;
+    using KianCommons;
+    using static KianCommons.Assertion;
     public class NodeInfoFamily {
         public NetInfo.Node TwoWayDouble;
         public NetInfo.Node TwoWayRight;
@@ -59,7 +63,7 @@ namespace HideUnconnectedTracks {
         public static NetInfo.Node CopyNodeInfo_shallow(NetInfo.Node nodeInfo) {
             Assert(nodeInfo != null, "nodeInfo==null");
             NetInfo.Node ret = new NetInfo.Node();
-            Extensions.CopyProperties<NetInfo.Node>(ret, nodeInfo);
+            AssemblyTypeExtensions.CopyProperties<NetInfo.Node>(ret, nodeInfo);
             Assert(nodeInfo.m_material != null, $"nodeInfo m_material is null");
             return ret;
         }
@@ -91,13 +95,13 @@ namespace HideUnconnectedTracks {
             tracks = new NodeInfoFamily();
             wires = new NodeInfoFamily();
             foreach (var info in infos) {
-                Log("CreateFamilies:info=" + info, true);
+                //Log.Debug("CreateFamilies:info=" + info, true);
                 Assert((info.m_connectGroup & connectGroups) != 0, "(info.m_connectGroup & connectGroups) != 0");
                 for (int i = 0; i < info.m_nodes.Length; ++i) {
                     var nodeInfo = info.m_nodes[i];
                     if (!nodeInfo.m_connectGroup.IsFlagSet(connectGroups))
                         continue;
-                    Log($"CreateFamilies:info.m_nodes[{i}]=" + nodeInfo, true);
+                    //Log.Debug$"CreateFamilies:info.m_nodes[{i}]=" + nodeInfo, true);
                     Assert(nodeInfo.m_connectGroup.IsFlagSet(DOUBLE | SINGLE | STATION), "unexpected nodeInfo.m_connectGroup=" + info.m_nodeConnectGroups);
 
                     NodeInfoFamily family = nodeInfo.m_requireWindSpeed ? wires : tracks;
@@ -133,6 +137,10 @@ namespace HideUnconnectedTracks {
                     }
                 }// for each nodeInfo
             } //foreach info
+            var infos2 = infos.Select(info => info.name).ToArray();
+            var infos3 = "{" + string.Join(", ", infos2) + "}";
+            Log.Debug($"CreateFamilies(infos={infos3})->\n\ttracks:{tracks}\n\twires:{wires}", true);
+
         }
 
         public static void GenerateLUTs() {
@@ -156,12 +164,15 @@ namespace HideUnconnectedTracks {
                 VanillaTrainTracks = tracks;
                 VanillaTrainWires = wires;
                 GenerateVanillaCargoTracks();
+
+                Log.Debug("[POINT A0] train tracks:" + tracks);
+                tracks.TwoWayDouble.m_nodeMesh.DumpMesh("KIAN-train-twoway-double-tracks.obj");
             }
             // TODO
             // BP elevated train station (normal)
 
             {
-                Log("Creating Monorail ground family");
+                Log.Debug("Creating Monorail ground family");
                 // "Medium Road Monorail Station" "Monorail Station Track" "Monorail Track" "Monorail Oneway Track"
                 NetInfo StationTrack = GetInfo("Monorail Station Track");
                 NetInfo DoubleTrack = GetInfo("Monorail Track");
@@ -173,9 +184,11 @@ namespace HideUnconnectedTracks {
                 //wires.GenerateExtraMeshes();
                 LUT[tracks.StationDouble] = LUT[tracks.TwoWayDouble] = LUT[tracks.StationSingle] = tracks;
                 //LUT[wires.StationDouble] = LUT[wires.TwoWayDouble] = LUT[wires.StationSingle] = wires;
+
+                // TODO reuse materials to see if it covers "Medium Road Monorail Station"
             }
             {
-                Log("Creating Metro ground family");
+                Log.Debug("Creating Metro ground family");
                 // "Metro Station Track Ground 01" "Metro Track Ground 01"
                 NetInfo StationTrack = GetInfo("Metro Station Track Ground 01");
                 NetInfo DoubleTrack = GetInfo("Metro Track Ground 01");
@@ -186,9 +199,13 @@ namespace HideUnconnectedTracks {
                 //wires.GenerateExtraMeshes();
                 LUT[tracks.StationDouble] = LUT[tracks.TwoWayDouble] = tracks;
                 //LUT[wires.StationDouble] = LUT[wires.TwoWayDouble] = wires;
+
+                Log.Debug("[POINT A] Created ground metro tracks:" + tracks);
+                tracks.TwoWayDouble.m_nodeMesh.DumpMesh("KIAN-metro-twoway-double-tracks.obj");
+
             }
             {
-                Log("Creating Metro Elevated family");
+                Log.Debug("Creating Metro Elevated family");
                 // "Metro Station Track Elevated 01" "Metro Track Elevated 01"
                 NetInfo StationTrack = GetInfo("Metro Station Track Elevated 01");
                 NetInfo DoubleTrack = GetInfo("Metro Track Elevated 01");
@@ -200,8 +217,27 @@ namespace HideUnconnectedTracks {
                 LUT[tracks.StationDouble] = LUT[tracks.TwoWayDouble] = tracks;
                 //LUT[wires.StationDouble] = LUT[wires.TwoWayDouble] = wires;
             }
-
         }
+
+        public static void GenerateFamilyLUT(IEnumerable<string> infoNames, ConnectType connectType = ConnectType.All) {
+            var infos = infoNames.Select(name => GetInfo(name));
+            CreateFamily(infos, connectType, out var tracks, out var wires);
+
+            tracks.GenerateExtraMeshes();
+            if (tracks.StationDouble != null && tracks.TwoWayDouble != null) {
+                LUT[tracks.StationDouble] = LUT[tracks.TwoWayDouble] = tracks;
+                if (tracks.StationSingle != null && tracks.OneWayStart != null)
+                    LUT[tracks.StationSingle] = tracks;
+            }
+
+            wires.GenerateExtraMeshes();
+            if (wires.StationDouble != null && wires.TwoWayDouble != null) {
+                LUT[wires.StationDouble] = LUT[wires.TwoWayDouble] = wires;
+                if (wires.StationSingle != null && wires.OneWayStart != null)
+                    LUT[wires.StationSingle] = wires;
+            }
+        }
+
 
         public static void GenerateVanillaCargoTracks() {
             NetInfo CargoStationTrack = GetInfo("Train Cargo Track", false)
@@ -215,10 +251,6 @@ namespace HideUnconnectedTracks {
             LUT[cargotracks.StationDouble] = cargotracks;
             LUT[cargowires.StationDouble] = cargowires;
         }
-
-
-
-
 
         public static void GenerateDoubleTrackLUT() {
             int n = PrefabCollection<NetInfo>.LoadedCount();
@@ -243,7 +275,7 @@ namespace HideUnconnectedTracks {
         public static void GenerateDoubleTrackLUT(NetInfo.Node nodeInfo, NetInfo info) {
             NodeInfoFamily family = new NodeInfoFamily { TwoWayDouble = nodeInfo };
             family.GenerateExtraMeshes();
-            //Utils.Log._Debug($"GenerateCustomDoubleTrackLUT(nodeInfo={nodeInfo} info={info}): family=" + family);
+            //Utils.Log.Debug($"GenerateCustomDoubleTrackLUT(nodeInfo={nodeInfo} info={info}): family=" + family);
             Assert(family.TwoWayDouble != null, " family=" + family);
             LUT[family.TwoWayDouble] = family;
         }
@@ -254,12 +286,12 @@ namespace HideUnconnectedTracks {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                 if (info.name == name)
                     return info;
-                //Helpers.Log(info.name);
+                //Helpers.Log.Debuginfo.name);
             }
             if (throwOnError)
                 throw new Exception($"NetInfo {name} not found!");
             else
-                Log($"Warning: NetInfo {name} not found!");
+                Log.Debug($"Warning: NetInfo {name} not found!");
             return null;
         }
     }

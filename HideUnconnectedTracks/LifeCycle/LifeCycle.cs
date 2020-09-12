@@ -1,6 +1,6 @@
 namespace HideUnconnectedTracks.LifeCycle
 {
-    using HideUnconnectedTracks.Utils;
+    using HideUnconnectedTracks.Utils; using KianCommons;
 
     public static class LifeCycle
     {
