@@ -256,7 +256,7 @@ namespace HideUnconnectedTracks.Utils {
             flipMesh = false;
             VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup, nodeId.ToNode().Info);
             if (!HasLane(segmentId1, vehicleType)) // vehicleType == 0 is also checked here
-                return true;
+                return true; // not a track ... but a median.
             var nodeInfo2 = DetermineDirectConnect(
                 nodeInfo,
                 segmentId1,
@@ -289,8 +289,7 @@ namespace HideUnconnectedTracks.Utils {
 
             if (!LaneConnectionManager.Instance.HasNodeConnections(nodeId))
                 return nodeInfo;
-            //if (targetInfo != sourceInfo)
-            //    return nodeInfo;
+
             if (!NodeInfoLUT.LUT.ContainsKey(nodeInfo)) {
                 if (!HasLane(sourceSegmentId, vehicleType)) // vehicleType == 0 is also checked here
                     return nodeInfo;
@@ -398,9 +397,9 @@ namespace HideUnconnectedTracks.Utils {
                 case ConnectionT.Left:
                     return table.TwoWayLeft;
                 case ConnectionT.Right:
-                    Log.Debug("return table.TwoWayRight;");
                     return table.TwoWayRight;
                 case ConnectionT.Both:
+                    //Log.Debug("return table.TwoWayDouble;\n");
                     return table.TwoWayDouble;
 
                 default: // criss cross

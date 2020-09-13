@@ -20,16 +20,22 @@ namespace HideUnconnectedTracks.Patches {
             ushort targetSegmentID = nodeId.ToNode().GetSegment(targetSegmentIDX);
             if (TMPEUTILS.exists) {
                 try {
+                    //Log.Debug($"ShouldConnectTracks: " +
+                    //    $"sourceSegmentID={sourceSegmentID} targetSegmentID:{targetSegmentID} nodeId={nodeId}");
                     bool ret = DirectConnectUtil.DetermineDirectConnect(
                         sourceSegmentID,
                         targetSegmentID,
                         nodeId,
                         ref nodeInfo,
                         out bool flipMesh);
+
                     if (flipMesh) {
                         dataVector0.x = -dataVector0.x;
                         dataVector0.y = -dataVector0.y;
                     }
+
+                    //var tracks = NodeInfoLUT.LUT[nodeInfo] as NodeInfoFamily;
+                    //tracks.TwoWayDouble.m_nodeMesh.DumpMesh("ShouldConnectTracks-LUT[nodeInfo].TwoWayDouble");
                     return ret;
                 }
                 catch (Exception e) {
