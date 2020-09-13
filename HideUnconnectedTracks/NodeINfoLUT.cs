@@ -1,16 +1,18 @@
 using System;
-using static HideUnconnectedTracks.Utils.DirectConnectUtil;
 using System.Linq;
-using ObjUnity3D;
-using System.IO;
+using UnityEngine;
+using static HideUnconnectedTracks.Utils.DirectConnectUtil;
 
 namespace HideUnconnectedTracks {
     using ColossalFramework;
+    using KianCommons;
     using System.Collections;
     using System.Collections.Generic;
-    using Utils; using KianCommons;
-    using KianCommons;
+    using System.Text;
+    using Utils;
     using static KianCommons.Assertion;
+    using static MeshTable;
+
     public class NodeInfoFamily {
         public NetInfo.Node TwoWayDouble;
         public NetInfo.Node TwoWayRight;
@@ -29,18 +31,34 @@ namespace HideUnconnectedTracks {
             $"OneWay:{OneWay} OneWayEnd:{OneWayEnd} OneWayStart:{OneWayStart} | " +
             $"StationDouble:{StationDouble} StationSingle:{StationSingle} Station:{Station}";
 
-
         public void GenerateExtraMeshes() {
             if (TwoWayDouble == null)
                 return; //wires
+
+            NodeInfoFamily cached = MeshLUT[TwoWayDouble.m_nodeMesh];
+
             if (TwoWayRight == null) {
                 TwoWayRight = CopyNodeInfo_shallow(TwoWayDouble);
-                TwoWayRight.m_nodeMesh = TwoWayRight.m_nodeMesh.CutMesh(keepLeftSide: false);
+                if (cached != null)
+                    TwoWayRight.m_nodeMesh = cached.TwoWayRight.m_nodeMesh;
+                else
+                    TwoWayRight.m_nodeMesh = TwoWayDouble.m_nodeMesh.CutMesh(keepLeftSide: false);
             }
             if (TwoWayLeft == null) {
                 TwoWayLeft = CopyNodeInfo_shallow(TwoWayDouble);
-                TwoWayLeft.m_nodeMesh = TwoWayLeft.m_nodeMesh.CutMesh(keepLeftSide: true);
+                if (cached != null)
+                    TwoWayLeft.m_nodeMesh = cached.TwoWayLeft.m_nodeMesh;
+                else
+                    TwoWayLeft.m_nodeMesh = TwoWayDouble.m_nodeMesh.CutMesh(keepLeftSide: true);
             }
+
+            MeshLUT[TwoWayDouble.m_nodeMesh] = this;
+            if (StationDouble != null)
+                MeshLUT[StationDouble.m_nodeMesh] = this;
+            if (StationSingle != null)
+                MeshLUT[StationSingle.m_nodeMesh] = this;
+            if (Station != null)
+                MeshLUT[Station.m_nodeMesh] = this;
         }
 
         public void FillInTheBlanks(NodeInfoFamily source) {
@@ -71,11 +89,72 @@ namespace HideUnconnectedTracks {
 
     }
 
+    public class MeshTable {
+        public static MeshTable MeshLUT = new MeshTable();
+
+        Hashtable _meshTable = new Hashtable(1000);
+        Dictionary<string, NodeInfoFamily> _md5Table = new Dictionary<string, NodeInfoFamily>(1000);
+        //public static operator ;
+
+        public static byte[] ToBytes(Vector3[] v) {
+            const int vector3Size = sizeof(float) * 3;
+            byte[] buffer = new byte[v.Length * vector3Size];
+            for(int i=0; i<v.Length; ++i) {
+                var b1 = BitConverter.GetBytes(v[i].x);
+                var b2 = BitConverter.GetBytes(v[i].y);
+                var b3 = BitConverter.GetBytes(v[i].z);
+                Buffer.BlockCopy(b1, 0, buffer, i * vector3Size , sizeof(float) * 0);
+                Buffer.BlockCopy(b1, 0, buffer, i * vector3Size + sizeof(float) * 1, sizeof(float));
+                Buffer.BlockCopy(b1, 0, buffer, i * vector3Size + sizeof(float) * 2, sizeof(float));
+            }
+            return buffer;
+        }
+
+        public static string ToMD5(Vector3[] vertices) {
+            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create()) {
+                // TODO optimise:
+
+                var bytes = ToBytes(vertices);
+                byte[] hashBytes = md5.ComputeHash(bytes);
+
+                // Convert the byte array to hexadecimal string
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < hashBytes.Length; i++) {
+                    sb.Append(hashBytes[i].ToString("X2"));
+                }
+                return sb.ToString();
+            }
+        }
+
+        public NodeInfoFamily this[Mesh key] {
+            get {
+                AssertNotNull(key);
+                var ret = _meshTable[key] as NodeInfoFamily;
+                //return ret;
+                if (ret != null)
+                    return ret;
+                string md5 = ToMD5(key.vertices);
+                foreach (var pair in _md5Table) {
+                    if (pair.Key == md5)
+                        return pair.Value;
+                }
+                return null;
+            }
+            set {
+                AssertNotNull(value);
+                AssertNotNull(key);
+                _meshTable[key] = value;
+
+                string md5 = ToMD5(key.vertices);
+                _md5Table[md5] = value;
+            }
+        }
+    }
+
     public static class NodeInfoLUT {
         public static Hashtable LUT = new Hashtable();
         public static NodeInfoFamily VanillaTrainTracks;
         public static NodeInfoFamily VanillaTrainWires;
-
 
         public static void CreateFamily(IEnumerable<NetInfo> infos, out NodeInfoFamily tracks, out NodeInfoFamily wires)
             => CreateFamily(infos, ConnectType.All, out tracks, out wires);
@@ -132,7 +211,7 @@ namespace HideUnconnectedTracks {
                         // usually station and double are the same but for metro station for some reasong this is not the case
                         if (nodeInfo.m_connectGroup.IsFlagSet(DOUBLE))
                             family.StationDouble = nodeInfo;
-                        else if (nodeInfo.m_connectGroup.IsFlagSet(STATION)) 
+                        else if (nodeInfo.m_connectGroup.IsFlagSet(STATION))
                             family.Station = nodeInfo;
                         else //single
                             family.StationSingle = nodeInfo;
@@ -149,6 +228,7 @@ namespace HideUnconnectedTracks {
 
         public static void GenerateLUTs() {
             LUT = new Hashtable(10000);
+            MeshTable.MeshLUT = new MeshTable();
             GenerateStationTrackLUT();
             GenerateDoubleTrackLUT(); // must be called last to avoid duplicates
         }
@@ -217,6 +297,9 @@ namespace HideUnconnectedTracks {
                 LUT[tracks.StationDouble] = LUT[tracks.TwoWayDouble] = tracks;
                 if (tracks.StationSingle != null && tracks.OneWayStart != null)
                     LUT[tracks.StationSingle] = tracks;
+                if (tracks.Station != null)
+                    LUT[tracks.Station] = tracks;
+
             }
 
             wires.GenerateExtraMeshes();
@@ -224,9 +307,10 @@ namespace HideUnconnectedTracks {
                 LUT[wires.StationDouble] = LUT[wires.TwoWayDouble] = wires;
                 if (wires.StationSingle != null && wires.OneWayStart != null)
                     LUT[wires.StationSingle] = wires;
+                if (wires.Station != null)
+                    LUT[wires.Station] = wires;
             }
         }
-
 
         public static void GenerateVanillaCargoTracks() {
             NetInfo CargoStationTrack = GetInfo("Train Cargo Track", false)
@@ -243,7 +327,7 @@ namespace HideUnconnectedTracks {
 
         public static void GenerateDoubleTrackLUT() {
             int n = PrefabCollection<NetInfo>.LoadedCount();
-            for(uint i = 0; i < n; ++i) {
+            for (uint i = 0; i < n; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                 if (info == null) continue;
                 if (!info.m_connectGroup.IsFlagSet(DOUBLE))
@@ -254,7 +338,7 @@ namespace HideUnconnectedTracks {
                     if (LUT.ContainsKey(nodeInfo))
                         continue; // skip vanilla/duplicate
                     if (!nodeInfo.m_connectGroup.IsFlagSet(DOUBLE))
-                        continue; 
+                        continue;
                     if (!IsTrack(nodeInfo, info))
                         continue; // skip median
 
@@ -271,7 +355,7 @@ namespace HideUnconnectedTracks {
             LUT[family.TwoWayDouble] = family;
         }
 
-        public static NetInfo GetInfo(string name, bool throwOnError=true) {
+        public static NetInfo GetInfo(string name, bool throwOnError = true) {
             int count = PrefabCollection<NetInfo>.LoadedCount();
             for (uint i = 0; i < count; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
