@@ -1,3 +1,7 @@
+bug: hide unconnected tracks can confuse left and right.
+  1- undo the md5 changes to see if that fixes the problem
+  2- load the saved game to see if the problem is fixed
+
 - try to see if I can increase coverage by reusing materials/meshes instead of/in addition to netInfos.
 
 - support for tracks that have multiple wire/track nodeInfos.
