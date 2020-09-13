@@ -49,7 +49,7 @@ namespace HideUnconnectedTracks {
                 if (cached != null)
                     TwoWayLeft.m_nodeMesh = cached.TwoWayLeft.m_nodeMesh;
                 else
-                    TwoWayLeft.m_nodeMesh = TwoWayDouble.m_nodeMesh.CutMesh(keepLeftSide: false);
+                    TwoWayLeft.m_nodeMesh = TwoWayDouble.m_nodeMesh.CutMesh(keepLeftSide: true);
             }
 
             MeshLUT[TwoWayDouble.m_nodeMesh] = this;
