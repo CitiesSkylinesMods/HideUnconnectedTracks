@@ -22,8 +22,8 @@ namespace HideUnconnectedTracks.Utils {
         }
 
         public static void CopyProperties<T>(object target, object origin) {
-            Assert(target is T, "target is T");
-            Assert(origin is T, "origin is T");
+            Assert(target is T, $"target({target}) is T({typeof(T)})" );
+            Assert(origin is T, $"target({origin}) is T({typeof(T)})");
             FieldInfo[] fields = typeof(T).GetFields();
             foreach (FieldInfo fieldInfo in fields) {
                 //Extensions.Log($"Copying field:<{fieldInfo.Name}> ...>");

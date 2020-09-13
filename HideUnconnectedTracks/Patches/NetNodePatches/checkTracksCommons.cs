@@ -2,11 +2,12 @@ using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using KianCommons;
 
 namespace HideUnconnectedTracks.Patches {
     using System;
     using UnityEngine;
-    using Utils;
+    using Utils; using KianCommons;
     using static TranspilerUtils;
     public static class CheckTracksCommons {
         public static bool ShouldConnectTracks(
@@ -19,16 +20,22 @@ namespace HideUnconnectedTracks.Patches {
             ushort targetSegmentID = nodeId.ToNode().GetSegment(targetSegmentIDX);
             if (TMPEUTILS.exists) {
                 try {
+                    //Log.Debug($"ShouldConnectTracks: " +
+                    //    $"sourceSegmentID={sourceSegmentID} targetSegmentID:{targetSegmentID} nodeId={nodeId}");
                     bool ret = DirectConnectUtil.DetermineDirectConnect(
                         sourceSegmentID,
                         targetSegmentID,
                         nodeId,
                         ref nodeInfo,
                         out bool flipMesh);
+
                     if (flipMesh) {
                         dataVector0.x = -dataVector0.x;
                         dataVector0.y = -dataVector0.y;
                     }
+
+                    //var tracks = NodeInfoLUT.LUT[nodeInfo] as NodeInfoFamily;
+                    //tracks.TwoWayDouble.m_nodeMesh.DumpMesh("ShouldConnectTracks-LUT[nodeInfo].TwoWayDouble");
                     return ret;
                 }
                 catch (Exception e) {
@@ -59,7 +66,7 @@ namespace HideUnconnectedTracks.Patches {
              */
             int index = 0;
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Callvirt, mCheckRenderDistance), index, counter: occurance);
-            Extensions.Assert(index != 0, "index!=0");
+            Assertion.Assert(index != 0, "index!=0");
             CodeInstruction LDLocA_NodeInfo = Build_LDLocA_NodeInfo(codes, index, counter: 1, dir: -1);
             CodeInstruction LDLocA_DataVector0 = Build_LDLocA_DataVector0(codes, index, counter: 1, dir: -1);
 
@@ -85,7 +92,7 @@ namespace HideUnconnectedTracks.Patches {
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Ldfld, fNodes), index, counter: counter, dir: dir);
             var code = codes[index + 3];
 
-            Extensions.Assert(code.IsStloc(), $"IsStLoc(code) | code={code}");
+            Assertion.Assert(code.IsStloc(), $"IsStLoc(code) | code={code}");
             return new CodeInstruction(OpCodes.Ldloca_S, code.operand);
         }
 
@@ -93,7 +100,7 @@ namespace HideUnconnectedTracks.Patches {
             index = SearchInstruction(codes, new CodeInstruction(OpCodes.Ldfld, fDataVector0), index, counter: counter, dir: dir);
             var code = codes[index + 1];
 
-            Extensions.Assert(code.IsStloc(), $"IsStLoc(code) | code={code}");
+            Assertion.Assert(code.IsStloc(), $"IsStLoc(code) | code={code}");
             return new CodeInstruction(OpCodes.Ldloca_S, code.operand);
         }
 

@@ -5,17 +5,17 @@ using System.Reflection.Emit;
 using System.Collections.Generic;
 
 namespace HideUnconnectedTracks.Patches.NetNodePatches {
-    using Utils;
+    using Utils; using KianCommons;
 
     [HarmonyPatch()]
     public static class RenderInstance {
-        static void Log(string m) => Extensions.Log("NetNode_RenderInstance Transpiler: " + m);
+        static void Log(string m) => KianCommons.Log.Debug("NetNode_RenderInstance Transpiler: " + m);
 
         // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
         static MethodInfo Target => typeof(global::NetNode).GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
         static MethodBase TargetMethod() {
             var ret = Target;
-            Extensions.Assert(ret != null, "did not manage to find original function to patch");
+            Assertion.Assert(ret != null, "did not manage to find original function to patch");
             Log("aquired method " + ret);
             return ret;
         }

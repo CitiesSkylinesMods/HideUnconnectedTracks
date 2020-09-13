@@ -1,9 +1,10 @@
 using ObjUnity3D;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-
+using HideUnconnectedTracks.Utils; using KianCommons;
 namespace HideUnconnectedTracks.Utils {
     public static class MeshUtil {
         public static Mesh LoadMesh(string fileName) {
@@ -12,6 +13,21 @@ namespace HideUnconnectedTracks.Utils {
             var mesh = new Mesh();
             mesh.LoadOBJ(OBJLoader.LoadOBJ(stream));
             return mesh;
+        }
+
+        public static void DumpMesh(this Mesh mesh, string fileName) {
+            Extensions.Assert(mesh != null);
+            foreach (char c in @"\/:<>|" + "\"") {
+                fileName = fileName.Replace(c.ToString(), "");
+            }
+
+            string dir = "DC_Dumps";
+            Directory.CreateDirectory(dir);
+            string path = Path.Combine(dir, fileName + ".obj");
+            Log.Debug($"dumping mesh {mesh.name} to " + path);
+            using (FileStream fs = new FileStream(Path.Combine(dir, fileName + ".obj"), FileMode.Create)) {
+                OBJLoader.ExportOBJ(mesh.EncodeOBJ(), fs);
+            }
         }
 
         public static Mesh CutMesh(this Mesh mesh, bool keepLeftSide) {
@@ -85,7 +101,7 @@ namespace HideUnconnectedTracks.Utils {
                     return keepLeftSide ? mesh.vertices[t].x < 0 + EPSILON : mesh.vertices[t].x > 0 - EPSILON;
                 }
                 if (GoodSide(i) && GoodSide(i + 1) && GoodSide(i + 2)) {
-                    //Log._Debug($"Adding triangle[i:i+2]i={i}");
+                    //Log.Debug($"Adding triangle[i:i+2]i={i}");
                     newTriangleList.Add(mesh.triangles[i]);
                     newTriangleList.Add(mesh.triangles[i + 1]);
                     newTriangleList.Add(mesh.triangles[i + 2]);

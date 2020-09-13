@@ -5,10 +5,10 @@ using HarmonyLib;
 
 namespace HideUnconnectedTracks.Patches {
     using System.Reflection;
-    using Utils;
+    using Utils; using KianCommons;
     public static class TranspilerUtils {
         static void Log(object message) {
-            Extensions.Log("TRANSPILER " + message);
+            KianCommons.Log.Debug("TRANSPILER " + message);
         }
 
         public static List<CodeInstruction> ToCodeList(IEnumerable<CodeInstruction> instructions) {

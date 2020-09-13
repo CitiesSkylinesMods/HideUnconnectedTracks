@@ -1,0 +1,3 @@
+- try to see if I can increase coverage by reusing materials/meshes instead of/in addition to netInfos.
+
+- support for tracks that have multiple wire/track nodeInfos.
