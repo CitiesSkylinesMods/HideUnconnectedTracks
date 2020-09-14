@@ -95,6 +95,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DecompiledSources\NetNode_.cs" />
+    <Compile Include="Data_Manager\MeshTable.cs" />
+    <Compile Include="Data_Manager\NodeInfoFamily.cs" />
     <Compile Include="KianCommons\KianCommons\Math\BezierUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Math\ControlPoint2.cs" />
     <Compile Include="KianCommons\KianCommons\Math\ControlPoint3.cs" />
@@ -127,7 +129,7 @@
     <Compile Include="KianCommons\KianCommons\Util\SerializationUtil.cs" />
     <Compile Include="LifeCycle\LifeCycle.cs" />
     <Compile Include="LifeCycle\LoadingExtension.cs" />
-    <Compile Include="NodeInfoLUT.cs" />
+    <Compile Include="Data_Manager\NodeInfoLUT.cs" />
     <Compile Include="LifeCycle\KianMod.cs" />
     <Compile Include="Patches\NetNodePatches\checkTracksCommons.cs" />
     <Compile Include="Patches\NetNodePatches\RefreshJunctionData.cs" />

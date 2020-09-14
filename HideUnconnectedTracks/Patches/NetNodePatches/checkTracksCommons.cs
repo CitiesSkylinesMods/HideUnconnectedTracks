@@ -2,7 +2,7 @@ using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using KianCommons;
+using System.IO;
 
 namespace HideUnconnectedTracks.Patches {
     using System;
@@ -10,6 +10,12 @@ namespace HideUnconnectedTracks.Patches {
     using Utils; using KianCommons;
     using static TranspilerUtils;
     public static class CheckTracksCommons {
+        /// <summary>
+        /// determines if DC node should be rendered modifying it if necessary.
+        /// </summary>
+        /// <param name="nodeInfo">node to be rendered. some inputs are post modified if necessary</param>
+        /// <param name="dataVector0">data vectors. they are reversed if necessary.</param>
+        /// <returns>if node should be rendered</returns>
         public static bool ShouldConnectTracks(
         ushort nodeId,
         ref RenderManager.Instance data,
@@ -20,8 +26,28 @@ namespace HideUnconnectedTracks.Patches {
             ushort targetSegmentID = nodeId.ToNode().GetSegment(targetSegmentIDX);
             if (TMPEUTILS.exists) {
                 try {
-                    //Log.Debug($"ShouldConnectTracks: " +
-                    //    $"sourceSegmentID={sourceSegmentID} targetSegmentID:{targetSegmentID} nodeId={nodeId}");
+//#if DEBUG
+//                    var info = nodeId.ToNode().Info;
+//                    int i = Array.IndexOf(info.m_nodes, nodeInfo);
+//                    //return (DateTime.Now.Second % 5) switch
+//                    //{
+//                    //    0 => i == 0,
+//                    //    1 => i == 1,
+//                    //    2 => i == 2,
+//                    //    3 => i == 3,
+//                    //    4 => i == 5,
+//                    //};
+//                    bool verbose = true;
+
+//                    Mesh mesh1 = nodeInfo.m_nodeMesh;
+//                    if  (verbose) {
+//                        Log.Debug($"\nShouldConnectTracks() [PRE] : " +
+//                        $"info={info.name} sourceSegmentID={sourceSegmentID} targetSegmentID:{targetSegmentID} nodeId={nodeId}\n\t" +
+//                        $"info.m_nodes[{i}].mesh={mesh1.name}");
+//                        string filename = $"ShouldConnectTracks-PRE {info.name}[{i}].{mesh1.name}";
+//                        //mesh1.DumpMesh(filename);
+//                    }
+//#endif
                     bool ret = DirectConnectUtil.DetermineDirectConnect(
                         sourceSegmentID,
                         targetSegmentID,
@@ -34,8 +60,13 @@ namespace HideUnconnectedTracks.Patches {
                         dataVector0.y = -dataVector0.y;
                     }
 
-                    //var tracks = NodeInfoLUT.LUT[nodeInfo] as NodeInfoFamily;
-                    //tracks.TwoWayDouble.m_nodeMesh.DumpMesh("ShouldConnectTracks-LUT[nodeInfo].TwoWayDouble");
+                    //Mesh mesh2 = nodeInfo.m_nodeMesh;
+                    //if (verbose && mesh2) {
+                    //    Log.Debug($"ShouldConnectTracks() [POST]: nodeInfo.mesh={mesh2.name}");
+                    //    string filename = $"ShouldConnectTracks-POST {info.name}[{i}] with {mesh2.name}";
+                    //    //mesh2.DumpMesh(filename);
+
+                    //}
                     return ret;
                 }
                 catch (Exception e) {

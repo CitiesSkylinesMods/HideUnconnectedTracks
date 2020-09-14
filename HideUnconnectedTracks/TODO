@@ -1,3 +1,10 @@
-- try to see if I can increase coverage by reusing materials/meshes instead of/in addition to netInfos.
+- try to see if I can increase coverage by reusing materials/meshes instead of/in addition to netInfos. (done not tested)
+
+bug: why some of the node infos from ronyx double tracks are not connected?
 
 - support for tracks that have multiple wire/track nodeInfos.
+
+- forbidden flag: level crossing.
+
+- if info.connectGroup == DOUBLE and info.connectGroup == (None or DOUBLE):
+     NetInfo.Node.connectGroup == None is same as NetInfo.Node.connectGroup == DOUBLE
