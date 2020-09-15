@@ -14,7 +14,14 @@ namespace HideUnconnectedTracks {
 
         Hashtable _meshTable = new Hashtable(1000);
         Dictionary<string, NodeInfoFamily> _md5Table = new Dictionary<string, NodeInfoFamily>(1000);
-        //public static operator ;
+
+        /// <summary>
+        /// caches md5 from vertix array instead of caching mesh.
+        /// this makes mesh comparison indifferent to mesh name.
+        /// assuming there is a 1:1 correspondence between mesh name and mesh shape,
+        /// this can be set to false to speed up loading times.
+        /// </summary>
+        const bool vertexBasedMD5_ = false;
 
         public static byte[] ToBytes(Vector3[] v) {
             const int vector3Size = sizeof(float) * 3;
@@ -50,23 +57,25 @@ namespace HideUnconnectedTracks {
             get {
                 AssertNotNull(key);
                 var ret = _meshTable[key] as NodeInfoFamily;
+                if (vertexBasedMD5_) {
+                    if (ret != null)
+                        return ret;
+                    string md5 = ToMD5(key.vertices);
+                    foreach (var pair in _md5Table) {
+                        if (pair.Key == md5)
+                            return pair.Value;
+                    }
+                }
                 return ret;
-                //if (ret != null)
-                //    return ret;
-                //string md5 = ToMD5(key.vertices);
-                //foreach (var pair in _md5Table) {
-                //    if (pair.Key == md5)
-                //        return pair.Value;
-                //}
-                //return null;
             }
             set {
                 AssertNotNull(value);
                 AssertNotNull(key);
                 _meshTable[key] = value;
-
-                //string md5 = ToMD5(key.vertices);
-                //_md5Table[md5] = value;
+                if (vertexBasedMD5_) {
+                    string md5 = ToMD5(key.vertices);
+                    _md5Table[md5] = value;
+                }
             }
         }
     }
