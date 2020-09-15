@@ -97,6 +97,8 @@
     <None Include="DecompiledSources\NetNode_.cs" />
     <Compile Include="Data_Manager\MeshTable.cs" />
     <Compile Include="Data_Manager\NodeInfoFamily.cs" />
+    <Compile Include="Data_Manager\TrackFamily.cs" />
+    <Compile Include="Data_Manager\TrackType.cs" />
     <Compile Include="KianCommons\KianCommons\Math\BezierUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Math\ControlPoint2.cs" />
     <Compile Include="KianCommons\KianCommons\Math\ControlPoint3.cs" />

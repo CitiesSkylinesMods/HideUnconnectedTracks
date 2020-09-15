@@ -5,16 +5,9 @@ namespace HideUnconnectedTracks.Utils {
     using TrafficManager.Manager.Impl;
     using KianCommons;
     using static KianCommons.NetUtil;
+    using System.Collections.Generic;
 
-    public enum ConnectType {
-        None,
-        Train,
-        Metro,
-        Monorail,
-        Tram,
-        Trolly,
-        All,
-    }
+
 
     public static class DirectConnectUtil {
         //public const VehicleInfo.VehicleType TRACK_VEHICLE_TYPES =
@@ -73,18 +66,6 @@ namespace HideUnconnectedTracks.Utils {
             NetInfo.ConnectGroup.NarrowTrolleybus |
             NetInfo.ConnectGroup.WideTrolleybus;
 
-        public static NetInfo.ConnectGroup GetConnectGroups(this ConnectType connectType) {
-            switch (connectType) {
-                case ConnectType.Train: return TRAIN;
-                case ConnectType.Metro: return METRO;
-                case ConnectType.Monorail: return MONORAIL;
-                case ConnectType.Trolly: return TROLLY;
-                case ConnectType.Tram: return TRAM;
-                case ConnectType.None: return NetInfo.ConnectGroup.None;
-                case ConnectType.All: return TRAIN | METRO | MONORAIL | TROLLY | TRAM;
-                default: throw new Exception("Unreachable code");
-            }
-        }
 
         internal static VehicleInfo.VehicleType GetVehicleType(NetInfo.ConnectGroup flags, NetInfo info = null) {
             VehicleInfo.VehicleType ret = 0;
