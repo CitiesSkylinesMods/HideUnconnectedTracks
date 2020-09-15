@@ -1,30 +1,40 @@
 namespace HideUnconnectedTracks {
-    using System;
-    using System.Linq;
     using ColossalFramework;
     using KianCommons;
+    using System;
     using System.Collections;
     using System.Collections.Generic;
-    using Utils;
-    using static KianCommons.Assertion;
-    using static MeshTable;
-    using static HideUnconnectedTracks.Utils.DirectConnectUtil;
     using System.IO;
+    using System.Linq;
+    using static HideUnconnectedTracks.Utils.DirectConnectUtil;
+    using static MeshTable;
 
     public static class NodeInfoLUT {
         public static Hashtable LUT = new Hashtable();
+
+        public static readonly string[] BuiltInFamilies = new[] {
+                "Train Track,Train Oneway Track,Train Station Track",
+                "Monorail Station Track,Monorail Track,Monorail Oneway Track",
+                "Metro Station Track Ground 01,Metro Track Ground 01",
+            };
+
+        public static string FamiliesPath = "track-famlilies.txt";
 
         public static void GenerateLUTs() {
             LUT = new Hashtable(10000);
             MeshLUT = new MeshTable();
 
-            var families = new List<string>(new [] {
-                "Train Track,Train Oneway Track,Train Station Track",
-                "Monorail Station Track,Monorail Track,Monorail Oneway Track",
-                "Metro Station Track Ground 01,Metro Track Ground 01",
-            });
-            using (Stream fs = new FileStream("track-famlilies.txt", FileMode.OpenOrCreate)) {
-                using (StreamReader reader = new StreamReader(fs)) {
+            using (Stream fs0 = new FileStream(FamiliesPath, FileMode.CreateNew)) {
+                using (StreamWriter writer = new StreamWriter(fs0)) {
+                    foreach (var line in BuiltInFamilies)
+                        writer.WriteLine(line);
+                }
+            }
+
+
+            List<string> families = new List<string>();
+            using (Stream fs1 = new FileStream("track-famlilies.txt", FileMode.OpenOrCreate)) {
+                using (StreamReader reader = new StreamReader(fs1)) {
                     while (reader.ReadLine() is string line)
                         families.Add(line);
                 }
@@ -46,17 +56,19 @@ namespace HideUnconnectedTracks {
         }
 
         public static void GenerateFamilyLUT(IEnumerable<string> infoNames, TrackType trackType = TrackType.All) {
-            var infos = infoNames.Select(name => GetInfo(name));
+            var infos = infoNames.Select(name => GetInfo(name, throwOnError: false));
             var trackFamily = TrackFamily.CreateFamily(infos, trackType);
 
-            foreach(var subFamily in trackFamily.SubFamilies.Values) {
+            foreach (var subFamily in trackFamily.SubFamilies.Values) {
                 subFamily.GenerateExtraMeshes();
                 subFamily.AddStationsToLUT();
             }
         }
 
         public static void GenerateDoubleTrackLUT() {
+            Log.Info("GenerateDoubleTrackLUT() called");
             int n = PrefabCollection<NetInfo>.LoadedCount();
+            int count = 0;
             for (uint i = 0; i < n; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                 if (info == null) continue;
@@ -73,8 +85,10 @@ namespace HideUnconnectedTracks {
                         continue; // skip median
 
                     GenerateDoubleTrackLUT(nodeInfo);
+                    count++;
                 }
             }
+            Log.Info($"GenerateDoubleTrackLUT() successfully generated {count} pair of half tracks");
         }
 
         public static void GenerateDoubleTrackLUT(NetInfo.Node nodeInfo) {
@@ -85,6 +99,8 @@ namespace HideUnconnectedTracks {
         }
 
         public static void RecycleStationTrackMesh() {
+            Log.Info("RecycleStationTrackMesh() called");
+
             int n = PrefabCollection<NetInfo>.LoadedCount();
             for (uint i = 0; i < n; ++i) {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
@@ -96,7 +112,7 @@ namespace HideUnconnectedTracks {
                         continue;
                     if (LUT.ContainsKey(nodeInfo))
                         continue; // skip vanilla/duplicate
-                   if (!IsTrack(nodeInfo, info))
+                    if (!IsTrack(nodeInfo, info))
                         continue; // skip median
 
                     RecycleStationTrackMesh(nodeInfo);

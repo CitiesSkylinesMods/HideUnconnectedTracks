@@ -16,8 +16,7 @@ namespace HideUnconnectedTracks {
         Dictionary<string, NodeInfoFamily> _md5Table = new Dictionary<string, NodeInfoFamily>(1000);
 
         /// <summary>
-        /// caches md5 from vertix array instead of caching mesh.
-        /// this makes mesh comparison indifferent to mesh name.
+        /// takes longer but ignores mesh name
         /// assuming there is a 1:1 correspondence between mesh name and mesh shape,
         /// this can be set to false to speed up loading times.
         /// </summary>

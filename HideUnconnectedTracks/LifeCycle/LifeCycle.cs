@@ -9,7 +9,7 @@ namespace HideUnconnectedTracks.LifeCycle
             Log.Info("LifeCycle.Load() called");
             TMPEUTILS.Init();
             NodeInfoLUT.GenerateLUTs();
-
+            Log.Info("LifeCycle.Load() successful");
         }
 
         public static void Release()
