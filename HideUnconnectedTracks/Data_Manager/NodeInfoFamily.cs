@@ -4,7 +4,31 @@ namespace HideUnconnectedTracks {
     using static MeshTable;
     using static NodeInfoLUT;
 
+    public struct NodeInfoClass {
+        // if there are shared connect groups for multiple tracks, then create multiple
+        // bool IsTrackTrain, IsTrackMetro ... fields.
+        public TrackType Track;
+        public NetNode.Flags RequiredFlags;
+        public NetNode.Flags ForbiddenFlags;
+        public bool RequireWindSpeed;
+        public int Layer;
+        public bool EmptyTransparent;
+        public bool RequireSurfaceMaps;
+
+        public NodeInfoClass(NetInfo.Node nodeInfo) {
+            Track = nodeInfo.m_connectGroup.GetTrackType();
+            RequiredFlags = nodeInfo.m_flagsRequired;
+            ForbiddenFlags = nodeInfo.m_flagsForbidden;
+            RequireWindSpeed = nodeInfo.m_requireWindSpeed;
+            Layer = nodeInfo.m_layer;
+            EmptyTransparent = nodeInfo.m_emptyTransparent;
+            RequireSurfaceMaps = nodeInfo.m_requireSurfaceMaps;
+        }
+    }
+
     public class NodeInfoFamily {
+        public NodeInfoClass Type;
+
         public NetInfo.Node TwoWayDouble;
         public NetInfo.Node TwoWayRight;
         public NetInfo.Node TwoWayLeft;
