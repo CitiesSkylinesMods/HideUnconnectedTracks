@@ -1,33 +1,12 @@
 namespace HideUnconnectedTracks {
     using KianCommons;
+    using System;
     using static KianCommons.Assertion;
     using static MeshTable;
     using static NodeInfoLUT;
 
-    public struct NodeInfoClass {
-        // if there are shared connect groups for multiple tracks, then create multiple
-        // bool IsTrackTrain, IsTrackMetro ... fields.
-        public TrackType Track;
-        public NetNode.Flags RequiredFlags;
-        public NetNode.Flags ForbiddenFlags;
-        public bool RequireWindSpeed;
-        public int Layer;
-        public bool EmptyTransparent;
-        public bool RequireSurfaceMaps;
-
-        public NodeInfoClass(NetInfo.Node nodeInfo) {
-            Track = nodeInfo.m_connectGroup.GetTrackType();
-            RequiredFlags = nodeInfo.m_flagsRequired;
-            ForbiddenFlags = nodeInfo.m_flagsForbidden;
-            RequireWindSpeed = nodeInfo.m_requireWindSpeed;
-            Layer = nodeInfo.m_layer;
-            EmptyTransparent = nodeInfo.m_emptyTransparent;
-            RequireSurfaceMaps = nodeInfo.m_requireSurfaceMaps;
-        }
-    }
-
     public class NodeInfoFamily {
-        public NodeInfoClass Type;
+        public NodeInfoClass Class;
 
         public NetInfo.Node TwoWayDouble;
         public NetInfo.Node TwoWayRight;
@@ -41,14 +20,22 @@ namespace HideUnconnectedTracks {
         public NetInfo.Node StationSingle;
         public NetInfo.Node Station;
 
-        public override string ToString() =>
-            $"TwoWayDouble:{TwoWayDouble} TwoWayRight:{TwoWayRight} TwoWayLeft:{TwoWayLeft} | " +
-            $"OneWay:{OneWay} OneWayEnd:{OneWayEnd} OneWayStart:{OneWayStart} | " +
-            $"StationDouble:{StationDouble} StationSingle:{StationSingle} Station:{Station}";
+        public override string ToString() {
+            string T(NetInfo.Node nodeInfo) {
+                if (nodeInfo == null)
+                    return "<EMPTY>";
+                string ret = nodeInfo.m_nodeMesh?.name ?? "<MESH=null>";
+                return string.Format("{0,-20}", ret);
+            }
+            return $"TwoWayDouble:{T(TwoWayDouble)} TwoWayRight:{T(TwoWayRight)} TwoWayLeft:{T(TwoWayLeft)} | " +
+            $"OneWay:{T(OneWay)} OneWayEnd:{T(OneWayEnd)} OneWayStart:{T(OneWayStart)} | " +
+            $"StationDouble:{T(StationDouble)} StationSingle:{T(StationSingle)} Station:{T(Station)} | Class={Class}  ";
+        }
 
-        public void GenerateExtraMeshes() {
+        /// <returns>if new meshes where generated.</returns>
+        public bool GenerateExtraMeshes() {
             if (TwoWayDouble == null)
-                return; //wires
+                return false;
 
             NodeInfoFamily cached = MeshLUT[TwoWayDouble.m_nodeMesh];
 
@@ -74,6 +61,8 @@ namespace HideUnconnectedTracks {
                 MeshLUT[StationSingle.m_nodeMesh] = this;
             if (Station != null)
                 MeshLUT[Station.m_nodeMesh] = this;
+
+            return cached == null;
         }
 
         public void FillInTheBlanks(NodeInfoFamily source, bool station = false) {
@@ -105,10 +94,14 @@ namespace HideUnconnectedTracks {
             }
         }
 
-        public bool IsComplete() =>
-            TwoWayDouble != null && TwoWayRight != null && TwoWayLeft != null &&
+        public bool IsComplete =>
+            CanComplete && TwoWayRight != null && TwoWayLeft != null && TwoWayRight != null;
+
+        public bool CanComplete =>
+            TwoWayDouble != null &&
             OneWay != null && OneWayEnd != null && OneWayStart != null &&
             StationDouble != null && StationSingle != null;
+
 
         public static NetInfo.Node CopyNodeInfo_shallow(NetInfo.Node nodeInfo) {
             Assert(nodeInfo != null, "nodeInfo==null");
