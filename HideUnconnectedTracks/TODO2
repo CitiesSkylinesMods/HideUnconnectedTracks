@@ -1,0 +1,76 @@
+for the time being only the following tracks are supported by my mod:
+    - double station
+    - single oneway
+    - double twoway
+bidirectional tracks are NOT supported. 
+
+if you remember you can create families in a text file called "track-famlilies.txt":
+	Train Track,Train Oneway Track,Train Station Track
+	Monorail Station Track,Monorail Track,Monorail Oneway Track
+	Metro Station Track Ground 01,Metro Track Ground 01
+	1574857232.R69Railway GrCo 2x2 S_Data, 1574857232.R69Railway GrCo 1x1_Data, 1574857232.R69Railway GrCo 2x2_Data
+
+each family only needs 3 tracks: station/double/single and it will work out all other meshes automatically.
+
+also remmber that if multiple assets use the same mesh, my mod will treat them as one. so the first line in "track-famlilies.txt" will generate mesh Look Up Table (LUT) for much of the train station tracks in the workshop. the last line in "track-famlilies.txt" creates LUT for Ronyx69 tracks that re-use the same meshes.
+
+the difficult part of my mod is creating meshes for station tracks. creating meshes for double tracks is much easier and does not need the user to supply track families.
+
+please include the unsupported tracks in your list anyways because I will improve the mod. however they are not required for the purpose of this test.
+
+So I need a list of tracks I mentioned above and I need to know:
+1- how many of them are unique? i mean which one of them are using same track mesh so they kind of count as one (note that if meshes are the same, they can be recycled so they count as one)
+2- which one of them are flawless. which ones are buggy or inconsistent.
+3- which one of them use the same mesh as vanilla so we don't even need to bother.
+kjmci17/09/2020
+I'm just stepping out to take my dog for a walk. I will have a look at this when I get back :slight_smile:
+
+
+===================
+How to identify inconsistencies  from the log:
+[Info]  0.3461427 | Successfully  created tracks for:
+prefab names={Train Track, Train Oneway Track, Train Station Track} sub-families=
+    TwoWayDouble:Box02 bla bla bla ...
+    bla bla bla
+    ...
+
+translation: no problem! it works. asset names are: Train Track, Train Oneway Track, Train Station Track
+---
+[Info]  0.7540291 | Warning: the following family has inconsistent  nodes (ie NetInfo.Node).
+prefab names={1574857232.R69Railway GrCo 2x2 S_Data, 1574857232.R69Railway GrCo 1x1_Data, 1574857232.R69Railway GrCo 2x2_Data} sub-families=
+    TwoWayDouble:Box02 bla bla bla ...
+    bla bla bla
+    ...
+increasing inconsistency level from 0 to 1 and trying again ...
+
+translation: there is inconsistencies. trying to recover from inconsistency by ignoring some inconsistent data.
+---
+[Info]  0.9228947 | WARNING: the following family is incomplete
+prefab names={1574857232.R69Railway GrCo 2x2 S_Data, 1574857232.R69Railway GrCo 1x1_Data, 1574857232.R69Railway GrCo 2x2_Data} sub-families=
+
+translation: cannot recover from inconsistencies AND/OR asset has bugs AND/OR asset is incomplete
+that blah blah part helps me understand what are the problems :slight_smile:
+
+====================
+How to know which assets have similar track meshes to the ones defined in "track-famlilies.txt" :
+
+[Info]  361.1157785 | RecycleStationTrackMesh() called
+[Info]  361.1188581 | Recycled half track meshes for station track: Train Cargo Track
+[Info]  361.1199177 | Recycled half track meshes for station track: Train Connection Track
+[Info]  361.1211279 | Recycled half track meshes for station track: Train Connection Track Elevated
+[Info]  361.1228969 | Recycled half track meshes for station track: Train Cargo Track Elevated
+[Info]  361.1242500 | Recycled half track meshes for station track: Metro Station Track Elevated 01
+[Info]  361.1258243 | Recycled half track meshes for station track: Medium Road Monorail Station
+
+translation: the tracks above had a mesh which was identical to a track present in "track-famlilies.txt". so no need to add these tracks to "track-famlilies.txt"
+===================
+[Info]  361.1142347 | GenerateDoubleTrackLUT() successful.
+generated:100 recycled: 14 pairs of half tracks for 10 track prefabs
+
+this part of the log is not so important in this task. it helps you understand how much time was saved recycling tracks.
+
+translation: 
+	- information about creating half(left and right) meshes for double tracks (easy part)
+	- 10 assets with double tracks have been analyzed.
+	- 100 track were recycled because an identical mesh was detected in the LUT
+	- generated 14 pairs of half tracks.
