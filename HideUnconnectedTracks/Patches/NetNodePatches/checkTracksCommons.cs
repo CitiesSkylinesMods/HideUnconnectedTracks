@@ -8,7 +8,9 @@ namespace HideUnconnectedTracks.Patches {
     using System;
     using UnityEngine;
     using Utils; using KianCommons;
-    using static TranspilerUtils;
+    using static KianCommons.Patches.TranspilerUtils;
+    using KianCommons.Patches;
+
     public static class CheckTracksCommons {
         /// <summary>
         /// determines if DC node should be rendered modifying it if necessary.
@@ -83,7 +85,7 @@ namespace HideUnconnectedTracks.Patches {
         static FieldInfo fNodes => typeof(NetInfo).GetField("m_nodes") ?? throw new Exception("fNodes is null");
         static FieldInfo fDataVector0 => typeof(RenderManager.Instance).GetField(nameof(RenderManager.Instance.m_dataVector0)) ?? throw new Exception("fDataVector0 is null");
 
-        public static void ApplyCheckTracks(List<CodeInstruction> codes, MethodInfo method, int occurance) {
+        public static void ApplyCheckTracks(List<CodeInstruction> codes, MethodBase method, int occurance) {
             /* TODO update this comment
             --->insert here
             [164 17 - 164 95]
@@ -96,15 +98,18 @@ namespace HideUnconnectedTracks.Patches {
             IL_02d4: brfalse      IL_0405
              */
             int index = 0;
-            index = SearchInstruction(codes, new CodeInstruction(OpCodes.Callvirt, mCheckRenderDistance), index, counter: occurance);
+            index = codes.Search(_c => _c.Calls(mCheckRenderDistance), startIndex: index, count: occurance);
             Assertion.Assert(index != 0, "index!=0");
             CodeInstruction LDLocA_NodeInfo = Build_LDLocA_NodeInfo(codes, index, counter: 1, dir: -1);
             CodeInstruction LDLocA_DataVector0 = Build_LDLocA_DataVector0(codes, index, counter: 1, dir: -1);
 
             //seek to <ldarg.s cameraInfo> instruction:
-            index = SearchInstruction(codes, GetLDArg(method, "cameraInfo"), index, counter: occurance, dir: -1);
+            int loc_cameraInfo = method.GetArgLoc("cameraInfo");
 
-            Label ContinueIndex = GetContinueLabel(codes, index, dir: -1); // IL_029d: br IL_0570
+            index = codes.Search(_c => _c.IsLdarg(loc_cameraInfo), startIndex:index, count:-1);
+            Label ?continueIndex = null;  // IL_029d: br IL_0570
+            codes.Search(_c => _c.Branches(out continueIndex), startIndex: index, count: -1);
+
             {
                 var newInstructions = new[]{
                     GetLDArg(method, "nodeID"),
@@ -112,7 +117,7 @@ namespace HideUnconnectedTracks.Patches {
                     LDLocA_NodeInfo,
                     LDLocA_DataVector0,
                     new CodeInstruction(OpCodes.Call, mShouldConnectTracks),
-                    new CodeInstruction(OpCodes.Brfalse, ContinueIndex), // if returned value is false then continue to the next iteration of for loop;
+                    new CodeInstruction(OpCodes.Brfalse, continueIndex), // if returned value is false then continue to the next iteration of for loop;
                 };
 
                 InsertInstructions(codes, newInstructions, index, true);

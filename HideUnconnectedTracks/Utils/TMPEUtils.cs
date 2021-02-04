@@ -18,7 +18,7 @@ namespace HideUnconnectedTracks.Utils {
                 try {
                     return _HasConnections(sourceLaneId, startNode);
                 }
-                catch (FileNotFoundException _) {
+                catch (FileNotFoundException) {
                     Debug.Log("ERROR ****** TMPE not found! *****");
                 }
                 catch (Exception e) {
@@ -40,7 +40,7 @@ namespace HideUnconnectedTracks.Utils {
                 try {
                     return _AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
                 }
-                catch (FileNotFoundException _) {
+                catch (FileNotFoundException) {
                     Debug.Log("ERROR ****** TMPE not found! *****");
                 }
                 catch (Exception e) {

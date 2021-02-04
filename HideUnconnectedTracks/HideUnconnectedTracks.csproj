@@ -111,7 +111,6 @@
     <Compile Include="KianCommons\KianCommons\Math\VecetorUtils.cs" />
     <Compile Include="KianCommons\KianCommons\Math\Vector2D.cs" />
     <Compile Include="KianCommons\KianCommons\Math\Vector3D.cs" />
-    <Compile Include="KianCommons\KianCommons\Math\Vector3Serializable.cs" />
     <Compile Include="KianCommons\KianCommons\ObjUnity3D\Extensions\MeshExt.cs" />
     <Compile Include="KianCommons\KianCommons\ObjUnity3D\Extensions\StringExt.cs" />
     <Compile Include="KianCommons\KianCommons\ObjUnity3D\Extensions\Utils.cs" />
@@ -125,13 +124,18 @@
     <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJLoader.cs" />
     <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJMaterial.cs" />
     <Compile Include="KianCommons\KianCommons\Patches\HarmonyUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\Assertion.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\EnumBitMaskExtensions.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\EnumerationExtensions.cs" />
     <Compile Include="KianCommons\KianCommons\Util\GridUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\HelpersExtensions.cs" />
     <Compile Include="KianCommons\KianCommons\Util\Log.cs" />
     <Compile Include="KianCommons\KianCommons\Util\MeshUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\NetUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\PluginUtil.cs" />
-    <Compile Include="KianCommons\KianCommons\Util\SerializationUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\ReflectionHelpers.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\StringExtensions.cs" />
     <Compile Include="LifeCycle\LifeCycle.cs" />
     <Compile Include="LifeCycle\LoadingExtension.cs" />
     <Compile Include="Data_Manager\NodeInfoLUT.cs" />
@@ -139,7 +143,6 @@
     <Compile Include="Patches\NetNodePatches\checkTracksCommons.cs" />
     <Compile Include="Patches\NetNodePatches\RefreshJunctionData.cs" />
     <Compile Include="Patches\NetNodePatches\RenderInstance.cs" />
-    <Compile Include="Patches\TranspilerUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="packages.config" />
     <None Include="TODO2" />

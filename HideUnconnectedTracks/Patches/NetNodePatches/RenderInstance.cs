@@ -3,7 +3,8 @@ using System;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Collections.Generic;
-using static KianCommons.HelpersExtensions;
+using static KianCommons.Assertion;
+using KianCommons.Patches;
 
 namespace HideUnconnectedTracks.Patches.NetNodePatches {
     using Utils; using KianCommons;
@@ -11,6 +12,7 @@ namespace HideUnconnectedTracks.Patches.NetNodePatches {
     [HarmonyPatch()]
     public static class RenderInstance {
         static string _logprefix = "NetNode.RenderInstance.Transpiler: ";
+        static bool VERBOSE => KianCommons.Log.VERBOSE;
 
         // RenderInstance(RenderManager.CameraInfo cameraInfo, ushort nodeID, NetInfo info, int iter, Flags flags, ref uint instanceIndex, ref RenderManager.Instance data)
         static MethodInfo Target => typeof(global::NetNode).GetMethod("RenderInstance", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -22,10 +24,10 @@ namespace HideUnconnectedTracks.Patches.NetNodePatches {
         }
 
         //static bool Prefix(ushort nodeID){}
-        public static IEnumerable<CodeInstruction> Transpiler(ILGenerator il, IEnumerable<CodeInstruction> instructions) {
+        public static IEnumerable<CodeInstruction> Transpiler(MethodBase original, IEnumerable<CodeInstruction> instructions) {
             try {
-                var codes = TranspilerUtils.ToCodeList(instructions);
-                CheckTracksCommons.ApplyCheckTracks(codes, Target, occurance:1);
+                var codes = instructions.ToCodeList();
+                CheckTracksCommons.ApplyCheckTracks(codes, original, occurance:1);
 
                 Log.Debug("successfully patched NetNode.RenderInstance()");
                 return codes;

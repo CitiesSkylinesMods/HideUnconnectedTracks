@@ -106,7 +106,7 @@ namespace HideUnconnectedTracks {
         public static NetInfo.Node CopyNodeInfo_shallow(NetInfo.Node nodeInfo) {
             Assert(nodeInfo != null, "nodeInfo==null");
             NetInfo.Node ret = new NetInfo.Node();
-            AssemblyTypeExtensions.CopyProperties<NetInfo.Node>(ret, nodeInfo);
+            ReflectionHelpers.CopyProperties<NetInfo.Node>(ret, nodeInfo);
             Assert(nodeInfo.m_material != null, $"nodeInfo m_material is null");
             return ret;
         }
