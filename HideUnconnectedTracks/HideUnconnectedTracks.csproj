@@ -1,40 +1,67 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{17034566-78DF-4C3D-BD3F-3B833CB2D872}</ProjectGuid>
     <TargetFramework>net35</TargetFramework>
-    <Deterministic>false</Deterministic>
-    <LangVersion>latest</LangVersion>
-    <AssemblyTitle>HideUnconnectedTracks</AssemblyTitle>
-    <Copyright>Copyright ©  2021</Copyright>
     <Deterministic>false</Deterministic>
     <AssemblyVersion>1.1.3.*</AssemblyVersion>
     <LangVersion>latest</LangVersion>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <PathMap>$(MSBuildProjectDirectory)\=$(ProjectName)\</PathMap>
     <Configurations>Debug;Release;Workshop</Configurations>
+
+    <PathMap>$(MSBuildProjectDirectory)/=$(ProjectName)/</PathMap>
+    <ManagedDLLPath>../dependencies</ManagedDLLPath>
+    <SteamPath>~/Library/Application Support/Steam/</SteamPath>
+    <SteamPath Condition="! Exists ('$(SteamPath)')">$(ProgramFiles)/Steam</SteamPath>
+    <SteamPath Condition="! Exists ('$(SteamPath)')">$(Registry:HKEY_CURRENT_USER\Software\Valve\Steam@SteamPath)</SteamPath>
+    <CSPath>$(SteamPath)/steamapps/common/Cities_Skylines</CSPath>
+    <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)</ContentPath>
+    <ManagedDLLPath Condition="!  Exists ('$(ManagedDLLPath)')">$(CSPath)/Cities_Data/Managed</ManagedDLLPath>
+    <AssemblySearchPaths>
+      $(AssemblySearchPaths);
+      $(ManagedDLLPath);
+      $(CitiesSkylinesBinaries);
+      ../libs/
+    </AssemblySearchPaths>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Workshop|AnyCPU' ">
     <ContentID>2019097300</ContentID>
+    <ContentPath>$(SteamPath)/steamapps/workshop/content/255710/$(ContentID)</ContentPath>
     <DefineConstants />
   </PropertyGroup>
-  <PropertyGroup>
-    <SteamPath>~/Library/Application Support/Steam/</SteamPath>
-    <SteamPath Condition="! Exists ('$(SteamPath)')">$(ProgramFiles)\Steam</SteamPath>
-    <SteamPath Condition="! Exists ('$(SteamPath)')">$(Registry:HKEY_CURRENT_USER\Software\Valve\Steam@SteamPath)</SteamPath>
-    <CSPath>$(SteamPath)\steamapps\common\Cities_Skylines</CSPath>
-    <ContentPath>$(SteamPath)\steamapps\workshop\content\255710\$(ContentID)</ContentPath>
-    <MangedDLLPath>$(CSPath)\Cities_Data\Managed</MangedDLLPath>
-    <MangedDLLPath Condition="!  Exists ('$(MangedDLLPath)')">..\dependencies</MangedDLLPath>
-    <UnityPath>$(MSBuildExtensionsPath64)\..\Unity\</UnityPath>
-    <UnityPath Condition="! Exists ('$(UnityPath)')">..\Unity\</UnityPath>
-    <MonoDir>$(UnityPath)Editor\Data\MonoBleedingEdge\</MonoDir>
-  </PropertyGroup>
-  <PropertyGroup>
-  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Reference>
+      <Private>False</Private>
+    </Reference>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <PackageReference Include="CitiesHarmony.API" Version="2.0.0" />
+    <PackageReference Include="Mono.Unofficial.pdb2mdb" Version="4.2.3.4" />
+    <PackageReference Include="GitInfo" Version="2.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp" />
+    <Reference Include="ColossalManaged" />
+    <Reference Include="ICities" />
+    <Reference Include="UnityEngine" />
+    <Reference Include="UnityEngine.UI" />
+    <Reference Include="CSUtil.Commons" />
+    <Reference Include="TMPE.CitiesGameBridge" />
+    <Reference Include="TMPE.GenericGameBridge" />
+    <Reference Include="TrafficManager" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="KianCommons\**" />
+    <EmbeddedResource Remove="KianCommons\**" />
+    <None Remove="KianCommons\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Assembly-CSharp">
@@ -80,71 +107,95 @@
     <None Include="TODO" />
     <Compile Remove="DecompiledSources\NetNode_.cs" />
     <Compile Remove="Patches\NetNodeDetours.cs" />
-    <Compile Remove="KianCommons\KianCommons\Patches\PrefixUtils.cs" />
-    <Compile Remove="KianCommons\KianCommons\Plugins\AdaptiveRoadsUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\Plugins\PluginUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\IOHelpers.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\JsonUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\SerializationUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\Vector3Serializable.cs" />
-    <Compile Remove="KianCommons\KianCommons\Serialization\XMLUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\RenderUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\TextureUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\UIExtensions.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\UIKeymappingsPanel.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\UIToolButton.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\UIUtils.cs" />
-    <Compile Remove="KianCommons\KianCommons\Util\AssemblyTypeExtensions.cs" />
-    <Compile Remove="KianCommons\KianCommons\Util\AuxilaryThread.cs" />
-    <Compile Remove="KianCommons\KianCommons\Util\CSURUtil.cs" />
-    <Compile Remove="KianCommons\KianCommons\Util\StackHelpers.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\Helpers\UIAutoSizePanel.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\Helpers\UIButtonExt.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\Helpers\UICheckboxDropDownExt.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\Helpers\UICheckBoxExt.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\Helpers\UIDropDownExt.cs" />
-    <Compile Remove="KianCommons\KianCommons\UI\Helpers\UISliderExt.cs" />
-    <Compile Remove="KianCommons\KianCommons\obj\Debug\net35\KianCommons.AssemblyInfo.cs" />
-    <Compile Remove="KianCommons\KianCommons\obj\Release\net35\KianCommons.AssemblyInfo.cs" />
-    <Compile Remove="KianCommons\KianCommons\obj\Workshop\net35\KianCommons.AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="KianCommons\KianCommons\.editorconfig" />
+    <Compile Include="KianCommons\KianCommons\IImplict\IMod.cs" />
+    <Compile Include="KianCommons\KianCommons\IImplict\IMonoBehaviour.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\BezierUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\ControlPoint2.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\ControlPoint3.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\CubicBezier3.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\LineUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\MathUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\VecetorUtils.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\Vector2D.cs" />
+    <Compile Include="KianCommons\KianCommons\Math\Vector3D.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\Extensions\MeshExt.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\Extensions\StringExt.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\Extensions\Utils.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\Extensions\Vector3Ext.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\Extensions\Vector4Ext.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\Int32Converter.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJData.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJFace.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJFaceVertex.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJGroup.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJLoader.cs" />
+    <Compile Include="KianCommons\KianCommons\ObjUnity3D\OBJMaterial.cs" />
+    <Compile Include="KianCommons\KianCommons\Patches\HarmonyUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Patches\TranspilerUtils.cs" />
+    <Compile Include="KianCommons\KianCommons\Plugins\AdaptiveRoadsUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Plugins\PluginUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\Assertion.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\AuxilaryThread.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\EnumBitMaskExtensions.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\EnumerationExtensions.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\GridUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\HelpersExtensions.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\Log.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\MeshUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\NetUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\ReflectionHelpers.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\StackHelpers.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\StringExtensions.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\TypeUtil.cs" />
   </ItemGroup>
-    <Target Name="DeployToModDirectory" AfterTargets="Build">
-        <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
-            <Output TaskParameter="Assemblies" ItemName="Targets" />
-        </GetAssemblyIdentity>
-        <PropertyGroup>
-            <DeployDir>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\</DeployDir>
-        </PropertyGroup>
-        <ItemGroup>
-            <AuxilaryFiles Include="$(TargetDir)**/*.*" Exclude="$(TargetPath);$(TargetDir)*.pdb" />
-            <VersionNumber Include="@(Targets->'%(Version)')" />
-        </ItemGroup>
-        <Delete Files="$(TargetPath).mdb" />
-        <Exec Command="&quot;$(MonoDir)bin\mono.exe&quot; &quot;$(MonoDir)lib\mono\4.5\pdb2mdb.exe&quot; &quot;$(TargetPath)&quot;" />
-        <Copy SourceFiles="$(TargetPath).mdb" DestinationFolder="$(DeployDir)" />
-        <Copy SourceFiles="@(AuxilaryFiles)" DestinationFolder="$(DeployDir)" />
-        <Delete Files="$(DeployDir)$(TargetFileName)" />
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployDir)" />
-        <Message Importance="high" Text="AssemblyVersion= @(VersionNumber)" />
-    </Target>
-    <Target Name="DeployToWorkshop" AfterTargets="DeployToModDirectory" Condition="'$(ContentID)'!=''">
-        <ItemGroup>
-            <FilesToDelete Include="$(ContentPath)\*.*" Exclude="$(ContentPath)\PreviewImage.png" />
-            <FilesToCopy Include="$(DeployDir)\*.*" />
-        </ItemGroup>
-        <Delete Files="@(FilesToDelete)" />
-        <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ContentPath)" />
-        <RemoveDir Directories="$(DeployDir)" />
-        <Message Importance="high" Text="Moved to $(ContentPath)" />
-    </Target>
-    <Target Name="CustomClean" BeforeTargets="CoreClean">
-        <PropertyGroup>
-            <DeployDir>$(LOCALAPPDATA)\Colossal Order\Cities_Skylines\Addons\Mods\$(ProjectName)\</DeployDir>
-        </PropertyGroup>
-        <Message Text="removing deploy directory" Importance="high" />
-        <RemoveDir Directories="$(DeployDir)" />
-    </Target>
+  <Target Name="DeployToModDirectory" AfterTargets="Build">
+    <Message Importance="high" Text="DeployToModDirectory ..." />
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="Targets" />
+    </GetAssemblyIdentity>
+    <ItemGroup>
+      <AuxiliaryFiles Include="$(TargetDir)**/*.*" Exclude="$(TargetPath);$(TargetDir)*.pdb;$(TargetDir)*.mdb" />
+      <VersionNumber Include="@(Targets->'%(Version)')" />
+    </ItemGroup>
+    <PropertyGroup>
+      <DeployDir Condition="'$(DeployDir)'==''">$(LOCALAPPDATA)/Colossal Order/Cities_Skylines/Addons/Mods/$(SolutionName)/</DeployDir>
+      <Now>$([System.DateTime]::Now.ToString("HH:mm:ss"))</Now>
+      <pdb2mdb>$(PkgMono_Unofficial_pdb2mdb)/tools/pdb2mdb.exe</pdb2mdb>
+      <ZipFileName>$(SolutionName)-V@(VersionNumber)-$(GitCommit)-$(Configuration).zip</ZipFileName>
+      <ZipFile>$(DeployDir)/../$(ZipFileName)</ZipFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <OldZipFiles Include="$(DeployDir)/../$(SolutionName)-*-$(Configuration).zip" />
+    </ItemGroup>
+
+    <Delete Files="$(TargetPath).mdb" />
+    <Exec Command="&quot;$(pdb2mdb)&quot; &quot;$(TargetPath)&quot;" />
+    <Copy SourceFiles="$(TargetPath).mdb" DestinationFolder="$(DeployDir)" />
+    <Copy SourceFiles="@(AuxiliaryFiles)" DestinationFolder="$(DeployDir)" />
+    <Delete Files="$(DeployDir)$(TargetFileName)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(DeployDir)" />
+    <Message Importance="high" Text="AssemblyVersion=@(VersionNumber) time=$(Now)" />
+    <Delete Files="@(OldZipFiles)" />
+    <ZipDirectory SourceDirectory="$(DeployDir)" DestinationFile="$(ZipFile)" />
+  </Target>
+  <Target Name="DeployToWorkshop" AfterTargets="DeployToModDirectory" Condition="'$(ContentID)'!=''">
+    <ItemGroup>
+      <FilesToDelete Include="$(ContentPath)/*.*" Exclude="$(ContentPath)/PreviewImage.png" />
+      <FilesToCopy Include="$(DeployDir)/*.*" />
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)" />
+    <Copy SourceFiles="@(FilesToCopy)" DestinationFolder="$(ContentPath)" />
+    <RemoveDir Directories="$(DeployDir)" />
+    <Message Importance="high" Text="Moved to $(ContentPath)" />
+  </Target>
+  <Target Name="CustomClean" BeforeTargets="CoreClean">
+    <RemoveDir Directories="$(TargetDir)" />
+    <PropertyGroup>
+      <DeployDir>$(LOCALAPPDATA)/Colossal Order/Cities_Skylines/Addons/Mods/$(SolutionName)/</DeployDir>
+    </PropertyGroup>
+    <Message Text="removing deploy directory" Importance="high" />
+    <RemoveDir Directories="$(DeployDir)" />
+  </Target>
 </Project>

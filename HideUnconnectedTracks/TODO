@@ -1,12 +1,9 @@
-- if info.connectGroup == DOUBLE and info.connectGroup == (None or DOUBLE):
-     NetInfo.Node.connectGroup == None is same as NetInfo.Node.connectGroup == DOUBLE   
+- support bidriractional tracks and oneway double/station tracks.
+    - double one way
+    - double birdirectional
+    - single bidirectional
+    - station single
+    - station single bidirectional
+    - station double oneway
+    - station double bidirectional
 
-- benchmark loading
-    - why does it take 10 sec to generate double track meshes? (code ready)
-
-- test/support bidriractional single tracks and one directional double tracks.
-
-
-change log:
-- multi nodeinfo support.
-- track-famlilies.txt is initialized by default tracks.
