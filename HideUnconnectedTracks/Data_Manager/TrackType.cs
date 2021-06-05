@@ -1,8 +1,8 @@
 namespace HideUnconnectedTracks {
     using System;
     using System.Collections.Generic;
-    using static HideUnconnectedTracks.Utils.DirectConnectUtil;
     using ColossalFramework;
+    using static KianCommons.DCUtil;
 
     public enum TrackType {
         None,

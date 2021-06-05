@@ -28,28 +28,6 @@ namespace HideUnconnectedTracks.Patches {
             ushort targetSegmentID = nodeId.ToNode().GetSegment(targetSegmentIDX);
             if (TMPEUTILS.exists) {
                 try {
-//#if DEBUG
-//                    var info = nodeId.ToNode().Info;
-//                    int i = Array.IndexOf(info.m_nodes, nodeInfo);
-//                    //return (DateTime.Now.Second % 5) switch
-//                    //{
-//                    //    0 => i == 0,
-//                    //    1 => i == 1,
-//                    //    2 => i == 2,
-//                    //    3 => i == 3,
-//                    //    4 => i == 5,
-//                    //};
-//                    bool verbose = true;
-
-//                    Mesh mesh1 = nodeInfo.m_nodeMesh;
-//                    if  (verbose) {
-//                        Log.Debug($"\nShouldConnectTracks() [PRE] : " +
-//                        $"info={info.name} sourceSegmentID={sourceSegmentID} targetSegmentID:{targetSegmentID} nodeId={nodeId}\n\t" +
-//                        $"info.m_nodes[{i}].mesh={mesh1.name}");
-//                        string filename = $"ShouldConnectTracks-PRE {info.name}[{i}].{mesh1.name}";
-//                        //mesh1.DumpMesh(filename);
-//                    }
-//#endif
                     bool ret = DirectConnectUtil.DetermineDirectConnect(
                         sourceSegmentID,
                         targetSegmentID,
@@ -62,13 +40,6 @@ namespace HideUnconnectedTracks.Patches {
                         dataVector0.y = -dataVector0.y;
                     }
 
-                    //Mesh mesh2 = nodeInfo.m_nodeMesh;
-                    //if (verbose && mesh2) {
-                    //    Log.Debug($"ShouldConnectTracks() [POST]: nodeInfo.mesh={mesh2.name}");
-                    //    string filename = $"ShouldConnectTracks-POST {info.name}[{i}] with {mesh2.name}";
-                    //    //mesh2.DumpMesh(filename);
-
-                    //}
                     return ret;
                 }
                 catch (Exception e) {

@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Deterministic>false</Deterministic>
     <AssemblyVersion>1.1.3.*</AssemblyVersion>
     <LangVersion>latest</LangVersion>
@@ -109,6 +110,7 @@
     <Compile Remove="Patches\NetNodeDetours.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KianCommons\KianCommons\Util\DCUtil.cs" />
     <Compile Include="KianCommons\KianCommons\IImplict\IMod.cs" />
     <Compile Include="KianCommons\KianCommons\IImplict\IMonoBehaviour.cs" />
     <Compile Include="KianCommons\KianCommons\Math\BezierUtil.cs" />
@@ -149,6 +151,7 @@
     <Compile Include="KianCommons\KianCommons\Util\StackHelpers.cs" />
     <Compile Include="KianCommons\KianCommons\Util\StringExtensions.cs" />
     <Compile Include="KianCommons\KianCommons\Util\TypeUtil.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\unsafe\FastSegmentList.cs" />
   </ItemGroup>
   <Target Name="DeployToModDirectory" AfterTargets="Build">
     <Message Importance="high" Text="DeployToModDirectory ..." />

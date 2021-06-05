@@ -6,7 +6,7 @@ namespace HideUnconnectedTracks {
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using static HideUnconnectedTracks.Utils.DirectConnectUtil;
+    using static KianCommons.DCUtil;
     using static MeshTable;
 
     public static class NodeInfoLUT {
