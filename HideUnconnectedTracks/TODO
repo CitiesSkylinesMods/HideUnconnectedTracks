@@ -7,3 +7,6 @@
     - station double oneway
     - station double bidirectional
 
+
+bugfix:
+    train cargo station connections to single tracks does not hide.
