@@ -247,14 +247,17 @@ namespace HideUnconnectedTracks.Utils {
                             otherSourceLane = sourceLane;
                         else
                             otherSourceLane = sourceLanes[i == 0 ? 1 : 0];
-
-                        var otherTargetLane = sourceLanes[j == 0 ? 1 : 0];
+                        LaneData otherTargetLane;
+                        if (isTargetSingle)
+                            otherTargetLane = targetLane;
+                        else
+                            otherTargetLane = targetLanes[j == 0 ? 1 : 0];
 
                         bool connected = AreLanesConnected(
                             sourceSegmentId, sourceLane.LaneID, (byte)sourceLane.LaneIndex,
                             targetSegmentId, targetLane.LaneID, (byte)targetLane.LaneIndex,
                             nodeId);
-
+                        
                         //Log($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} connected={connected}");
                         if (connected) {
                             bool sourceSmallerPos = sourceLane.LaneInfo.m_position < otherSourceLane.LaneInfo.m_position;
