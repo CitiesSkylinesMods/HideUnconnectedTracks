@@ -242,7 +242,12 @@ namespace HideUnconnectedTracks.Utils {
                     for (int j = 0; j < targetLanes.Length; ++j) {
                         var sourceLane = sourceLanes[i];
                         var targetLane = targetLanes[j];
-                        var otherSourceLane = sourceLanes[i == 0 ? 1 : 0];
+                        LaneData otherSourceLane;
+                        if (isSourceSignle)
+                            otherSourceLane = sourceLane;
+                        else
+                            otherSourceLane = sourceLanes[i == 0 ? 1 : 0];
+
                         var otherTargetLane = sourceLanes[j == 0 ? 1 : 0];
 
                         bool connected = AreLanesConnected(
