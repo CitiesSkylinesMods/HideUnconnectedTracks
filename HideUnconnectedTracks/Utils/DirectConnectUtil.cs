@@ -195,10 +195,12 @@ namespace HideUnconnectedTracks.Utils {
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType,
             out bool flipMesh) {
+            flipMesh = false;
             try {
-                flipMesh = false;
-                NetInfo sourceInfo = sourceSegmentId.ToSegment().Info;
-                NetInfo targetInfo = targetSegmentId.ToSegment().Info;
+                ref NetSegment sourceSegment = ref sourceSegmentId.ToSegment();
+                ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
+                NetInfo sourceInfo = sourceSegment.Info;
+                NetInfo targetInfo = targetSegment.Info;
                 //Log.Debug($"DetermineDirectConnect(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
 
                 if (!LaneConnectionManager.Instance.HasNodeConnections(nodeId))
@@ -218,10 +220,10 @@ namespace HideUnconnectedTracks.Utils {
 
                 ConnectionT connections = default;
 
-                bool sourceStartNode = IsStartNode(sourceSegmentId, nodeId);
-                bool sourceInvert = sourceSegmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
-                bool targetStartNode = IsStartNode(targetSegmentId, nodeId);
-                bool targetInvert = targetSegmentId.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
+                bool sourceStartNode = sourceSegment.IsStartNode(nodeId);
+                bool sourceInvert = sourceSegment.IsInvert();
+                bool targetStartNode = targetSegment.IsStartNode(nodeId);
+                bool targetInvert = targetSegment.IsInvert();
 
                 var sourceLanes = NetUtil.IterateLanes(
                     sourceSegmentId,
@@ -233,7 +235,7 @@ namespace HideUnconnectedTracks.Utils {
                     laneType: laneType,
                     vehicleType: vehicleType).ToArray();
 
-                bool singleSource = sourceLanes.Length == 1;
+                bool isSourceSignle = sourceLanes.Length == 1;
                 bool isTargetSingle = targetLanes.Length == 1;
 
                 for (int i = 0; i < sourceLanes.Length; ++i) {
@@ -266,7 +268,7 @@ namespace HideUnconnectedTracks.Utils {
                                     connections |= ConnectionT.Right;
                                 else
                                     connections |= ConnectionT.Left;
-                            } else if (singleSource) {
+                            } else if (isSourceSignle) {
                                 if (targetRight)
                                     connections |= ConnectionT.Right;
                                 else
@@ -324,7 +326,6 @@ namespace HideUnconnectedTracks.Utils {
                 }
             } catch (Exception ex) {
                 ex.Log();
-                flipMesh = false;
                 return nodeInfo;
             }
         }
