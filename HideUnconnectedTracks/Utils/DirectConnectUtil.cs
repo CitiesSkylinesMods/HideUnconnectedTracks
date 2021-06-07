@@ -1,6 +1,7 @@
 namespace HideUnconnectedTracks.Utils {
     using ColossalFramework;
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using TrafficManager.Manager.Impl;
     using KianCommons;
@@ -184,6 +185,15 @@ namespace HideUnconnectedTracks.Utils {
             
         }
 
+        static List<LaneData> sourceLanes_ = new List<LaneData>(2);
+        static List<LaneData> targetLanes_ = new List<LaneData>(2);
+
+        static void Init(this List<LaneData> list, LaneDataIterator it) {
+            list.Clear();
+            while (it.MoveNext())
+                list.Add(it.Current);
+        }
+
         /// <summary>
         /// Precondition: assuming that the segments can have connected lanes.
         /// </summary>
@@ -207,8 +217,6 @@ namespace HideUnconnectedTracks.Utils {
                     return nodeInfo;
 
                 if (!NodeInfoLUT.LUT.ContainsKey(nodeInfo)) {
-                    if (!HasLane(sourceSegmentId, vehicleType)) // vehicleType == 0 is also checked here
-                        return nodeInfo;
                     bool res = HasDirectConnect(
                         sourceSegmentId,
                         targetSegmentId,
@@ -225,33 +233,50 @@ namespace HideUnconnectedTracks.Utils {
                 bool targetStartNode = targetSegment.IsStartNode(nodeId);
                 bool targetInvert = targetSegment.IsInvert();
 
-                var sourceLanes = NetUtil.IterateLanes(
+                var sourceLanesIterator = new LaneDataIterator(
                     sourceSegmentId,
                     laneType: laneType,
-                    vehicleType: vehicleType).ToArray();
+                    vehicleType: vehicleType);
 
-                var targetLanes = NetUtil.IterateLanes(
+                var targetLanesIterator = new LaneDataIterator(
                     targetSegmentId,
                     laneType: laneType,
-                    vehicleType: vehicleType).ToArray();
+                    vehicleType: vehicleType);
 
-                bool isSourceSignle = sourceLanes.Length == 1;
-                bool isTargetSingle = targetLanes.Length == 1;
+                int nSourceLanes = sourceLanesIterator.Count;
+                int nTargetLanes = targetLanesIterator.Count;
 
-                for (int i = 0; i < sourceLanes.Length; ++i) {
-                    for (int j = 0; j < targetLanes.Length; ++j) {
-                        var sourceLane = sourceLanes[i];
-                        var targetLane = targetLanes[j];
-                        LaneData otherSourceLane;
+                if (nSourceLanes <= 1 && nTargetLanes <= 1) {
+                    return nodeInfo;
+                } else if (nSourceLanes > 2 || nTargetLanes > 2) {
+                    bool res = HasDirectConnect(
+                        sourceSegmentId,
+                        targetSegmentId,
+                        nodeId,
+                        NetInfo.LaneType.All,
+                        vehicleType);
+                    return res ? nodeInfo : null;
+                }
+                
+                bool isSourceSignle = nSourceLanes == 1;
+                bool isTargetSingle = nTargetLanes == 1;
+
+                sourceLanes_.Init(sourceLanesIterator);
+                targetLanes_.Init(targetLanesIterator);
+
+                for (int i = 0; i < nSourceLanes; ++i) {
+                    for (int j = 0; j < nTargetLanes; ++j) {
+                        var sourceLane = sourceLanes_[i];
+                        var targetLane = targetLanes_[j];
+                        LaneData otherSourceLane, otherTargetLane;
                         if (isSourceSignle)
                             otherSourceLane = sourceLane;
                         else
-                            otherSourceLane = sourceLanes[i == 0 ? 1 : 0];
-                        LaneData otherTargetLane;
+                            otherSourceLane = sourceLanes_[i == 0 ? 1 : 0];
                         if (isTargetSingle)
                             otherTargetLane = targetLane;
                         else
-                            otherTargetLane = targetLanes[j == 0 ? 1 : 0];
+                            otherTargetLane = targetLanes_[j == 0 ? 1 : 0]; 
 
                         bool connected = AreLanesConnected(
                             sourceSegmentId, sourceLane.LaneID, (byte)sourceLane.LaneIndex,
