@@ -40,7 +40,6 @@ namespace HideUnconnectedTracks {
         /// Fills in tracks/wires NodeInfoFamily. does not create any new meshes.
         /// Post condition: 
         /// call wires.GenerateExtraMeshes() and  tracks.GenerateExtraMeshes() if neccessary.
-        /// TODO: support tracks that have multipel wire/track node infos.
         /// </summary>
         /// <param name="infos"></param>
         /// <param name="tracks"></param>

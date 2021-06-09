@@ -188,7 +188,7 @@ namespace HideUnconnectedTracks.Utils {
         static List<LaneData> sourceLanes_ = new List<LaneData>(2);
         static List<LaneData> targetLanes_ = new List<LaneData>(2);
 
-        static void Init(this List<LaneData> list, LaneDataIterator it) {
+        static void Repopulate(this List<LaneData> list, LaneDataIterator it) {
             list.Clear();
             while (it.MoveNext())
                 list.Add(it.Current);
@@ -261,8 +261,8 @@ namespace HideUnconnectedTracks.Utils {
                 bool isSourceSignle = nSourceLanes == 1;
                 bool isTargetSingle = nTargetLanes == 1;
 
-                sourceLanes_.Init(sourceLanesIterator);
-                targetLanes_.Init(targetLanesIterator);
+                sourceLanes_.Repopulate(sourceLanesIterator);
+                targetLanes_.Repopulate(targetLanesIterator);
 
                 for (int i = 0; i < nSourceLanes; ++i) {
                     for (int j = 0; j < nTargetLanes; ++j) {
