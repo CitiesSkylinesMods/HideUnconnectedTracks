@@ -162,7 +162,7 @@ namespace HideUnconnectedTracks.Utils {
             out bool flipMesh) {
             try {
                 flipMesh = false;
-                VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup, nodeId.ToNode().Info);
+                VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
                 if (!HasLane(segmentId1, vehicleType)) // vehicleType == 0 is also checked here
                     return true; // not a track ... but a median.
                 var nodeInfo2 = DetermineDirectConnect(

@@ -8,6 +8,7 @@ namespace HideUnconnectedTracks {
     using System.Linq;
     using static KianCommons.DCUtil;
     using static MeshTable;
+    using HideUnconnectedTracks.Utils;
 
     public static class NodeInfoLUT {
         public static Hashtable LUT = new Hashtable();
@@ -34,7 +35,8 @@ namespace HideUnconnectedTracks {
                             writer.WriteLine(line);
                     }
                 }
-            } catch(IOException) { } // file already exists
+            }
+            catch (IOException) { } // file already exists
 
             List<string> families = new List<string>();
             using (Stream fs1 = new FileStream("track-famlilies.txt", FileMode.OpenOrCreate, FileAccess.Read)) {
@@ -51,9 +53,10 @@ namespace HideUnconnectedTracks {
 
             GenerateDoubleTrackLUT(); // call after GenerateFamilyLUT to avoid duplicates.
             RecycleStationTrackMesh();
+            // TODO: recycle single-2way and double-oneway tracks as well.
         }
 
-        public static void PrefabFixesAndWorkArounds() {
+        static void PrefabFixesAndWorkArounds() {
             // if info.m_ConnectGroup == DOUBLE and nodeInfo.DC and  nodeInfo.m_connectGroup == None :
             //    set nodeInfo.m_connectGroup = DOUBLE
             Log.Info("PrefabFixesWorkArounds() called", false);
@@ -63,11 +66,11 @@ namespace HideUnconnectedTracks {
                 NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
                 if (info.m_netAI is RoadBaseAI) continue; // might be a median
                 if (info == null) continue;
-                if (!info.m_requireDirectRenderers)continue;
-                if (info.m_connectGroup.IsFlagSet(STATION|SINGLE))continue;
-                if (!info.m_connectGroup.IsFlagSet(DOUBLE))continue;
+                if (!info.m_requireDirectRenderers) continue;
+                if (info.m_connectGroup.IsFlagSet(STATION | SINGLE)) continue;
+                if (!info.m_connectGroup.IsFlagSet(DOUBLE)) continue;
                 foreach (var nodeInfo in info.m_nodes) {
-                    if (!nodeInfo.m_directConnect)continue;
+                    if (!nodeInfo.m_directConnect) continue;
                     if (nodeInfo.m_connectGroup == NetInfo.ConnectGroup.None)
                         nodeInfo.m_connectGroup = info.m_connectGroup;
                 }
@@ -75,25 +78,25 @@ namespace HideUnconnectedTracks {
         }
 
 
-        public static void GenerateFamilyLUT(string family) {
+        static void GenerateFamilyLUT(string family) {
             Log.Info("Generating LUT for family:" + family);
             var infoNames = family.Split(',').Select(name => name.Trim());
             GenerateFamilyLUT(infoNames);
-        }
 
-        public static void GenerateFamilyLUT(IEnumerable<string> infoNames, TrackType trackType = TrackType.All) {
-            var infos = infoNames.Select(name => GetInfo(name, throwOnError: false));
-            infos = infos.Where(info => info != null);
+            static void GenerateFamilyLUT(IEnumerable<string> infoNames, TrackType trackType = TrackType.All) {
+                var infos = infoNames.Select(name => NetInfoUtil.GetInfo(name, throwOnError: false));
+                infos = infos.Where(info => info != null);
 
-            var trackFamily = TrackFamily.CreateFamily(infos, trackType);
+                var trackFamily = TrackFamily.CreateFamily(infos, trackType);
 
-            foreach (var subFamily in trackFamily.SubFamilyDict.Values) {
-                subFamily.GenerateExtraMeshes();
-                subFamily.AddStationsToLUT();
+                foreach (var subFamily in trackFamily.SubFamilyDict.Values) {
+                    subFamily.GenerateExtraMeshes();
+                    subFamily.AddStationsToLUT();
+                }
             }
         }
 
-        public static void GenerateDoubleTrackLUT() {
+        static void GenerateDoubleTrackLUT() {
             Log.Info("GenerateDoubleTrackLUT() called");
             int n = PrefabCollection<NetInfo>.LoadedCount();
             int generatedCount = 0;
@@ -123,17 +126,18 @@ namespace HideUnconnectedTracks {
                 if (processed)
                     processedPrefabCount++;
             }
-            Log.Info($"GenerateDoubleTrackLUT() successful.\n"+
+            Log.Info($"GenerateDoubleTrackLUT() successful.\n" +
                 $"generated:{generatedCount} recycled:{recycledCount} pairs of half tracks for {processedPrefabCount} track prefabs");
-        }
 
-        /// <returns>true if new meshes where generated</returns>
-        public static bool GenerateDoubleTrackLUT(NetInfo.Node nodeInfo) {
-            NodeInfoFamily family = new NodeInfoFamily { TwoWayDouble = nodeInfo };
-            bool ret = family.GenerateExtraMeshes();
-            //Utils.Log.Debug($"GenerateCustomDoubleTrackLUT(nodeInfo={nodeInfo} info={info}): family=" + family);
-            LUT[family.TwoWayDouble] = family;
-            return ret;
+
+            /// <returns>true if new meshes where generated</returns>
+            static bool GenerateDoubleTrackLUT(NetInfo.Node nodeInfo) {
+                NodeInfoFamily family = new NodeInfoFamily { TwoWayDouble = nodeInfo };
+                bool ret = family.GenerateExtraMeshes();
+                //Utils.Log.Debug($"GenerateCustomDoubleTrackLUT(nodeInfo={nodeInfo} info={info}): family=" + family);
+                LUT[family.TwoWayDouble] = family;
+                return ret;
+            }
         }
 
         public static void RecycleStationTrackMesh() {
@@ -145,60 +149,44 @@ namespace HideUnconnectedTracks {
                 if (info == null) continue;
                 if (!info.m_connectGroup.IsFlagSet(STATION))
                     continue;
+                Log.Debug("[p1] " + info.name );
                 bool recycled = false;
                 foreach (var nodeInfo in info.m_nodes) {
                     if (!nodeInfo.m_directConnect)
                         continue;
+                    Log.Debug("[p2] " + info.name);
                     if (LUT.ContainsKey(nodeInfo))
                         continue; // skip vanilla/duplicate
                     if (!IsTrack(nodeInfo, info))
                         continue; // skip median
 
-                    recycled |= RecycleStationTrackMesh(nodeInfo);
+                    Log.Debug("[p3] " + info.name);
+                    recycled |= Recycle(info, nodeInfo);
                 }
                 if (recycled)
                     Log.Info("Recycled half track meshes for station track: " + info.name, false);
             }
-        }
 
-        /// <returns>true if recycling was succesful.</returns>
-        public static bool RecycleStationTrackMesh(NetInfo.Node nodeInfo) {
-            NodeInfoFamily cache = MeshLUT[nodeInfo.m_nodeMesh];
-            if (cache == null) return false;
-            NodeInfoFamily family = new NodeInfoFamily();
-            family.FillInTheBlanks(cache);
+            /// <returns>true if recycling was succesful.</returns>
+            static bool Recycle(NetInfo info, NetInfo.Node nodeInfo) {
+                NodeInfoFamily cache = MeshLUT[nodeInfo.m_nodeMesh];
+                if (cache == null) return false;
+                NodeInfoFamily family = new NodeInfoFamily();
+                family.FillInTheBlanks(cache);
 
-            if (nodeInfo.m_connectGroup.IsFlagSet(DOUBLE)) {
-                family.StationDouble = nodeInfo;
-            } else if (nodeInfo.m_connectGroup.IsFlagSet(SINGLE)) {
-                family.StationSingle = nodeInfo;
-            } else if (nodeInfo.m_connectGroup.IsFlagSet(STATION)) {
-                family.Station = nodeInfo;
-            } else return false;
+                if (nodeInfo.m_connectGroup.IsFlagSet(DOUBLE)) {
+                    family.StationDouble = nodeInfo;
+                } else if (nodeInfo.m_connectGroup.IsFlagSet(SINGLE)) {
+                    Log.Debug("[p4] ");
+                    family.StationSingle = nodeInfo;
+                } else if (nodeInfo.m_connectGroup.IsFlagSet(STATION)) {
+                    family.Station = nodeInfo;
+                } else return false;
 
-            family.GenerateExtraMeshes(); // only recycles here.
-            family.AddStationsToLUT();
-            return true;
-        }
-
-        /// <summary>
-        /// Note: trims white spaces before comparison (both input name and asset name)
-        /// </summary>
-        public static NetInfo GetInfo(string name, bool throwOnError = true) {
-            int count = PrefabCollection<NetInfo>.LoadedCount();
-            for (uint i = 0; i < count; ++i) {
-                NetInfo info = PrefabCollection<NetInfo>.GetLoaded(i);
-                if (info.name.Trim() == name.Trim())
-                    return info;
-                //Helpers.Log.Debuginfo.name);
+                family.GenerateExtraMeshes(); // only recycles here.
+                family.AddStationsToLUT();
+                return true;
             }
-            if (throwOnError)
-                throw new Exception($"NetInfo {name} not found!");
-            else
-                Log.Debug($"Warning: NetInfo {name} not found!");
-            return null;
         }
     }
-
-
 }
