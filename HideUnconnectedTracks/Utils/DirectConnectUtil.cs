@@ -160,8 +160,8 @@ namespace HideUnconnectedTracks.Utils {
             ushort nodeId,
             ref NetInfo.Node nodeInfo,
             out bool flipMesh) {
+            flipMesh = false;
             try {
-                flipMesh = false;
                 VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
                 if (!HasLane(segmentId1, vehicleType)) // vehicleType == 0 is also checked here
                     return true; // not a track ... but a median.
@@ -179,7 +179,6 @@ namespace HideUnconnectedTracks.Utils {
                 return true;
             } catch (Exception ex) {
                 ex.Log();
-                flipMesh = false;
                 return false;
             }
             
@@ -211,7 +210,7 @@ namespace HideUnconnectedTracks.Utils {
                 ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
                 NetInfo sourceInfo = sourceSegment.Info;
                 NetInfo targetInfo = targetSegment.Info;
-                //Log.Debug($"DetermineDirectConnect(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
+                //Log.Debug($"{nameof(DetermineDirectConnect)}(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
 
                 if (!LaneConnectionManager.Instance.HasNodeConnections(nodeId))
                     return nodeInfo;
