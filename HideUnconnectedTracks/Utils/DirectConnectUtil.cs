@@ -26,9 +26,10 @@ namespace HideUnconnectedTracks.Utils {
             int nodeInfoIDX) {
             try {
                 NetInfo.Node nodeInfo = segmentId1.ToSegment().Info.m_nodes[nodeInfoIDX];
-                VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
-                if (!HasLane(segmentId1, vehicleType)) // vehicleType == 0 is also checked here
+                VehicleInfo.VehicleType vehicleType = nodeInfo.GetVehicleType();
+                if (!HasLane(segmentId1, vehicleType)) { // vehicleType == 0 is also checked here
                     return true;
+                }
                 return HasDirectConnect(
                     segmentId1,
                     segmentId2,
@@ -162,8 +163,9 @@ namespace HideUnconnectedTracks.Utils {
             out bool flipMesh) {
             flipMesh = false;
             try {
-                VehicleInfo.VehicleType vehicleType = GetVehicleType(nodeInfo.m_connectGroup);
-                if (!HasLane(segmentId1, vehicleType)) // vehicleType == 0 is also checked here
+                VehicleInfo.VehicleType vehicleType = nodeInfo.GetVehicleType();
+                if (!HasLane(segmentId1, vehicleType)
+                    .LogRet($"HasLane({segmentId1.ToSegment().Info.name}, {vehicleType})")) // vehicleType == 0 is also checked here
                     return true; // not a track ... but a median.
                 var nodeInfo2 = DetermineDirectConnect(
                     nodeInfo,
@@ -216,6 +218,7 @@ namespace HideUnconnectedTracks.Utils {
                     return nodeInfo;
 
                 if (!NodeInfoLUT.LUT.ContainsKey(nodeInfo)) {
+                    Log.Debug("[P1]");
                     bool res = HasDirectConnect(
                         sourceSegmentId,
                         targetSegmentId,

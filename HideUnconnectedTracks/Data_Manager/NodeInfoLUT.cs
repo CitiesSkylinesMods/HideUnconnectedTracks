@@ -120,6 +120,7 @@ namespace HideUnconnectedTracks {
 
                     bool generated = GenerateDoubleTrackLUT(nodeInfo);
                     if (generated) generatedCount++;
+                    //if (generated) Log.Debug($"GenerateDoubleTrackLUT() for {info.name}.{nodeInfo.m_mesh.name}");
                     else recycledCount++;
                     processed = true;
                 }
@@ -134,7 +135,6 @@ namespace HideUnconnectedTracks {
             static bool GenerateDoubleTrackLUT(NetInfo.Node nodeInfo) {
                 NodeInfoFamily family = new NodeInfoFamily { TwoWayDouble = nodeInfo };
                 bool ret = family.GenerateExtraMeshes();
-                //Utils.Log.Debug($"GenerateCustomDoubleTrackLUT(nodeInfo={nodeInfo} info={info}): family=" + family);
                 LUT[family.TwoWayDouble] = family;
                 return ret;
             }
@@ -149,18 +149,18 @@ namespace HideUnconnectedTracks {
                 if (info == null) continue;
                 if (!info.m_connectGroup.IsFlagSet(STATION))
                     continue;
-                Log.Debug("[p1] " + info.name );
+                //Log.Debug("[p1] " + info.name );
                 bool recycled = false;
                 foreach (var nodeInfo in info.m_nodes) {
                     if (!nodeInfo.m_directConnect)
                         continue;
-                    Log.Debug("[p2] " + info.name);
+                    //Log.Debug("[p2] " + info.name);
                     if (LUT.ContainsKey(nodeInfo))
                         continue; // skip vanilla/duplicate
                     if (!IsTrack(nodeInfo, info))
                         continue; // skip median
 
-                    Log.Debug("[p3] " + info.name);
+                    //Log.Debug("[p3] " + info.name);
                     recycled |= Recycle(info, nodeInfo);
                 }
                 if (recycled)
@@ -177,7 +177,7 @@ namespace HideUnconnectedTracks {
                 if (nodeInfo.m_connectGroup.IsFlagSet(DOUBLE)) {
                     family.StationDouble = nodeInfo;
                 } else if (nodeInfo.m_connectGroup.IsFlagSet(SINGLE)) {
-                    Log.Debug("[p4] ");
+                    //Log.Debug("[p4] ");
                     family.StationSingle = nodeInfo;
                 } else if (nodeInfo.m_connectGroup.IsFlagSet(STATION)) {
                     family.Station = nodeInfo;
