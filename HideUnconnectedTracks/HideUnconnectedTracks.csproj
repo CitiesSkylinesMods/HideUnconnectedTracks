@@ -153,6 +153,11 @@
     <Compile Include="KianCommons\KianCommons\Util\TypeUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\unsafe\FastSegmentList.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Resources\PreviewImage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Target Name="DeployToModDirectory" AfterTargets="Build">
     <Message Importance="high" Text="DeployToModDirectory ..." />
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
