@@ -190,7 +190,7 @@
   </Target>
   <Target Name="DeployToWorkshop" AfterTargets="DeployToModDirectory" Condition="'$(ContentID)'!=''">
     <ItemGroup>
-      <FilesToDelete Include="$(ContentPath)/*.*" Exclude="$(ContentPath)/PreviewImage.png" />
+      <FilesToDelete Include="$(ContentPath)/*.*" />
       <FilesToCopy Include="$(DeployDir)/*.*" />
     </ItemGroup>
     <Delete Files="@(FilesToDelete)" />
