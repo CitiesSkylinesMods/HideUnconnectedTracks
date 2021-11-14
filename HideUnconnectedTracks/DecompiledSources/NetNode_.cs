@@ -112,10 +112,10 @@ namespace DecompiledSources {
                                         m_dataVector3.w = data.m_dataFloat0;
                                     }
                                     if ((node.m_connectGroup & NetInfo.ConnectGroup.Oneway) != NetInfo.ConnectGroup.None) {
-                                        bool startNode1 = (bool)netService.IsStartNode(segmentID1, nodeID);
+                                        bool startNode1 = (bool)IsStartNode(segmentID1, nodeID);
                                         bool invert1 = segmentID1.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
                                         bool onewayEnd1 = !startNode1 == invert1; //tail in RHT
-                                        bool startNode2 = (bool)netService.IsStartNode(segmentID2, nodeID);
+                                        bool startNode2 = (bool)IsStartNode(segmentID2, nodeID);
                                         bool invert2 = segmentID2.ToSegment().m_flags.IsFlagSet(NetSegment.Flags.Invert);
                                         bool flag2 = startNode2 == !invert2; //tail in RHT
                                         bool oneway2 = info2.m_hasBackwardVehicleLanes != info2.m_hasForwardVehicleLanes;
