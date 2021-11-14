@@ -52,8 +52,6 @@
     <Reference Include="UnityEngine" />
     <Reference Include="UnityEngine.UI" />
     <Reference Include="CSUtil.Commons" />
-    <Reference Include="TMPE.CitiesGameBridge" />
-    <Reference Include="TMPE.GenericGameBridge" />
     <Reference Include="TrafficManager" />
   </ItemGroup>
 
@@ -75,14 +73,6 @@
     </Reference>
     <Reference Include="ICities">
       <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="TMPE.CitiesGameBridge">
-      <HintPath>..\libs\TMPE.CitiesGameBridge.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="TMPE.GenericGameBridge">
-      <HintPath>..\libs\TMPE.GenericGameBridge.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
