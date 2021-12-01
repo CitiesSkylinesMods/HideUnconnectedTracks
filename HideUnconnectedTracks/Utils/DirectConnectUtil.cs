@@ -3,13 +3,15 @@ namespace HideUnconnectedTracks.Utils {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using TrafficManager.Manager.Impl;
     using KianCommons;
     using static KianCommons.DCUtil;
     using static KianCommons.NetUtil;
+    using TrafficManager.API.Manager;
 
     public static class DirectConnectUtil {
-         /// <summary>
+        static ILaneConnectionManager LCMan => TrafficManager.Constants.ManagerFactory?.LaneConnectionManager;
+
+        /// <summary>
         /// Checks if any lanes from source segment can go to target segment.
         /// Precondition: assuming that the segments can have connected lanes.
         /// </summary>
@@ -89,10 +91,7 @@ namespace HideUnconnectedTracks.Utils {
                             continue;
                         }
 
-                        bool connected = AreLanesConnected(
-                            sourceSegmentId, sourceLaneId, (byte)sourceLaneIndex,
-                            targetSegmentId, targetLaneId, (byte)targetLaneIndex,
-                            nodeId);
+                        bool connected = TMPEUTILS.AreLanesConnected(sourceLaneId, targetLaneId, nodeId);
 
                         //Log($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} connected={connected}");
                         if (connected) {
@@ -105,43 +104,7 @@ namespace HideUnconnectedTracks.Utils {
             return false;
         }
 
-        static bool AreLanesConnected(
-            ushort segmentId1, uint laneId1, byte laneIndex1,
-            ushort segmentId2, uint laneId2, byte laneIndex2,
-            ushort nodeId) {
-            bool startNode1 = (bool)NetUtil.IsStartNode(segmentId1, nodeId);
-            bool startNode2 = (bool)NetUtil.IsStartNode(segmentId2, nodeId);
-            TMPEUTILS.GetLaneEndPoint(
-                segmentId1,
-                startNode1,
-                laneIndex1,
-                laneId1,
-                segmentId1.ToSegment().Info.m_lanes[laneIndex1],
-                out bool isSource1,
-                out bool isTarget1,
-                out _);
-            TMPEUTILS.GetLaneEndPoint(
-                segmentId2,
-                startNode2,
-                laneIndex2,
-                laneId2,
-                segmentId2.ToSegment().Info.m_lanes[laneIndex2],
-                out bool isSource2,
-                out bool isTarget2,
-                out _);
 
-            if ((isSource1 && isTarget2)) {
-                bool b1 = TMPEUTILS.HasConnections(laneId1, startNode1);
-                bool b2 = TMPEUTILS.AreLanesConnected(laneId1, laneId2, startNode1);
-                return !b1 || b2;
-            } else if (isTarget1 && isSource2) {
-                bool b1 = TMPEUTILS.HasConnections(laneId2, startNode2);
-                bool b2 = TMPEUTILS.AreLanesConnected(laneId2, laneId1, startNode2);
-                return !b1 || b2;
-            } else {
-                return false;
-            }
-        }
 
         [Flags]
         enum ConnectionT {
@@ -214,7 +177,7 @@ namespace HideUnconnectedTracks.Utils {
                 NetInfo targetInfo = targetSegment.Info;
                 //Log.Debug($"{nameof(DetermineDirectConnect)}(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
 
-                if (!LaneConnectionManager.Instance.HasNodeConnections(nodeId))
+                if (!LCMan.HasNodeConnections(nodeId))
                     return nodeInfo;
 
                 if (!NodeInfoLUT.LUT.ContainsKey(nodeInfo)) {
@@ -280,10 +243,7 @@ namespace HideUnconnectedTracks.Utils {
                         else
                             otherTargetLane = targetLanes_[j == 0 ? 1 : 0]; 
 
-                        bool connected = AreLanesConnected(
-                            sourceSegmentId, sourceLane.LaneID, (byte)sourceLane.LaneIndex,
-                            targetSegmentId, targetLane.LaneID, (byte)targetLane.LaneIndex,
-                            nodeId);
+                        bool connected = TMPEUTILS.AreLanesConnected(sourceLane.LaneID, targetLane.LaneID, nodeId);
                         
                         //Log($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} connected={connected}");
                         if (connected) {

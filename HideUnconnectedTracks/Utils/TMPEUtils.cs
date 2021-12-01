@@ -1,110 +1,32 @@
-using System;
-using System.IO;
-using System.Runtime.CompilerServices;
+using ColossalFramework.Math;
+using KianCommons;
+using KianCommons.Plugins;
+using System.Linq;
+using TrafficManager.API.Manager;
 using UnityEngine;
 
 namespace HideUnconnectedTracks.Utils {
     public static class TMPEUTILS {
         public static bool exists { get; set; } = true;
-        public static void Init() => exists = true;
+        public static void Init() => exists = PluginUtil.GetTrafficManager().IsActive();
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static bool _HasConnections(uint sourceLaneId, bool startNode) {
-            return TrafficManager.Manager.Impl.LaneConnectionManager.Instance.
-                HasConnections(sourceLaneId, startNode);
+        static IRoutingManager RMan => TrafficManager.Constants.ManagerFactory.RoutingManager;
+
+        public static bool IsLaneConnectedTo(uint sourceLaneID, uint targetLaneID, ushort nodeID) {
+            return GetForwardRoutings(sourceLaneID, nodeID).Any(item => item.laneId == targetLaneID);
         }
-        public static bool HasConnections(uint sourceLaneId, bool startNode) {
-            if (exists) {
-                try {
-                    return _HasConnections(sourceLaneId, startNode);
-                }
-                catch (FileNotFoundException) {
-                    Debug.Log("ERROR ****** TMPE not found! *****");
-                }
-                catch (Exception e) {
-                    Debug.Log(e + "\n" + e.StackTrace);
-                }
-                exists = false;
-            }
-            return false;
+        public static bool AreLanesConnected(uint laneID1, uint laneID2, ushort nodeId) {
+            ref var lane = ref laneID1.ToLane();
+            ref var lane2 = ref laneID2.ToLane();
+            return
+                IsLaneConnectedTo(laneID1, laneID2, nodeId) &&
+                IsLaneConnectedTo(laneID1, laneID2, nodeId);
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static bool _AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) { 
-            return TrafficManager.Manager.Impl.LaneConnectionManager.Instance.
-                AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
-        }
-
-        public static bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
-            if (exists) {
-                try {
-                    return _AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
-                }
-                catch (FileNotFoundException) {
-                    Debug.Log("ERROR ****** TMPE not found! *****");
-                }
-                catch (Exception e) {
-                    Debug.Log(e + "\n" + e.StackTrace);
-                }
-                exists = false;
-            }
-            return true;
-        }
-
-        internal static bool GetLaneEndPoint(ushort segmentId,
-                                      bool startNode,
-                                      byte laneIndex,
-                                      uint laneId,
-                                      NetInfo.Lane laneInfo,
-                                      out bool outgoing,
-                                      out bool incoming,
-                                      out Vector3? pos) {
-            NetManager netManager = NetManager.instance;
-
-            pos = null;
-            outgoing = false;
-            incoming = false;
-
-            if ((netManager.m_segments.m_buffer[segmentId].m_flags &
-                 (NetSegment.Flags.Created | NetSegment.Flags.Deleted)) != NetSegment.Flags.Created) {
-                return false;
-            }
-
-            if ((netManager.m_lanes.m_buffer[(uint)laneId].m_flags &
-                 ((ushort)NetLane.Flags.Created | (ushort)NetLane.Flags.Deleted)) !=
-                (ushort)NetLane.Flags.Created) {
-                return false;
-            }
-
-            NetInfo.Direction laneDir =
-                ((NetManager.instance.m_segments.m_buffer[segmentId].m_flags &
-                  NetSegment.Flags.Invert) == NetSegment.Flags.None)
-                    ? laneInfo.m_finalDirection
-                    : NetInfo.InvertDirection(laneInfo.m_finalDirection);
-
-            if (startNode) {
-                if ((laneDir & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
-                    outgoing = true;
-                }
-
-                if ((laneDir & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
-                    incoming = true;
-                }
-
-                pos = NetManager.instance.m_lanes.m_buffer[(uint)laneId].m_bezier.a;
-            } else {
-                if ((laneDir & NetInfo.Direction.Forward) != NetInfo.Direction.None) {
-                    outgoing = true;
-                }
-
-                if ((laneDir & NetInfo.Direction.Backward) != NetInfo.Direction.None) {
-                    incoming = true;
-                }
-
-                pos = NetManager.instance.m_lanes.m_buffer[(uint)laneId].m_bezier.d;
-            }
-
-            return true;
+        public static LaneTransitionData[] GetForwardRoutings(uint laneID, ushort nodeID) {
+            bool startNode = laneID.ToLane().m_segment.ToSegment().IsStartNode(nodeID);
+            uint routingIndex = RMan.GetLaneEndRoutingIndex(laneID, startNode);
+            return RMan.LaneEndForwardRoutings[routingIndex].transitions ?? new LaneTransitionData[0];
         }
     }
 }

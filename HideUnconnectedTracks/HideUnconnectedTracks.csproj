@@ -53,6 +53,8 @@
     <Reference Include="UnityEngine.UI" />
     <Reference Include="CSUtil.Commons" />
     <Reference Include="TrafficManager" />
+    <Reference Include="TMPE.API" />
+    <Reference Include="NetworkSkins"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -62,41 +64,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(MangedDLLPath)\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ColossalManaged">
-      <HintPath>$(MangedDLLPath)\ColossalManaged.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ICities">
-      <HintPath>$(MangedDLLPath)\ICities.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(MangedDLLPath)\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="CSUtil.Commons">
-      <HintPath>..\libs\CSUtil.Commons.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="TrafficManager">
-      <HintPath>..\libs\TrafficManager.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="NetworkSkins">
-      <HintPath>..\libs\NetworkSkins.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="DecompiledSources\NetNode_.cs" />
     <None Include="TODO2" />
     <None Include="TODO" />
-    <Compile Remove="DecompiledSources\NetNode_.cs" />
+    <Compile Remove="DecompiledSources" />
     <Compile Remove="Patches\NetNodeDetours.cs" />
   </ItemGroup>
   <ItemGroup>
