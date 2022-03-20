@@ -54,7 +54,7 @@ namespace HideUnconnectedTracks {
 
         public NodeInfoFamily this[Mesh key] {
             get {
-                AssertNotNull(key);
+                if (key == null) return null;
                 var ret = _meshTable[key] as NodeInfoFamily;
                 if (vertexBasedMD5_) {
                     if (ret != null)

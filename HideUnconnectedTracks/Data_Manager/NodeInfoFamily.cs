@@ -34,7 +34,7 @@ namespace HideUnconnectedTracks {
 
         /// <returns>if new meshes where generated.</returns>
         public bool GenerateExtraMeshes() {
-            if (TwoWayDouble == null)
+            if (TwoWayDouble?.m_nodeMesh == null)
                 return false;
 
             NodeInfoFamily cached = MeshLUT[TwoWayDouble.m_nodeMesh];
