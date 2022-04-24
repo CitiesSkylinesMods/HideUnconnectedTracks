@@ -1,9 +1,6 @@
 namespace HideUnconnectedTracks.Utils {
-    using ColossalFramework;
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using TrafficManager.Manager.Impl;
     using KianCommons;
     using static KianCommons.DCUtil;
     using static KianCommons.NetUtil;
@@ -214,7 +211,7 @@ namespace HideUnconnectedTracks.Utils {
                 NetInfo targetInfo = targetSegment.Info;
                 //Log.Debug($"{nameof(DetermineDirectConnect)}(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
 
-                if (!LaneConnectionManager.Instance.HasNodeConnections(nodeId))
+                if (!TMPEUTILS.LCM.HasNodeConnections(nodeId))
                     return nodeInfo;
 
                 if (!NodeInfoLUT.LUT.ContainsKey(nodeInfo)) {

@@ -2,16 +2,18 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using TrafficManager.API.Manager;
 
 namespace HideUnconnectedTracks.Utils {
     public static class TMPEUTILS {
         public static bool exists { get; set; } = true;
         public static void Init() => exists = true;
 
+        public static ILaneConnectionManager LCM => TrafficManager.API.Implementations.ManagerFactory.LaneConnectionManager;
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static bool _HasConnections(uint sourceLaneId, bool startNode) {
-            return TrafficManager.Manager.Impl.LaneConnectionManager.Instance.
-                HasConnections(sourceLaneId, startNode);
+            return LCM.HasConnections(sourceLaneId, startNode);
         }
         public static bool HasConnections(uint sourceLaneId, bool startNode) {
             if (exists) {
@@ -31,8 +33,7 @@ namespace HideUnconnectedTracks.Utils {
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static bool _AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) { 
-            return TrafficManager.Manager.Impl.LaneConnectionManager.Instance.
-                AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
+            return LCM.AreLanesConnected(sourceLaneId, targetLaneId, sourceStartNode);
         }
 
         public static bool AreLanesConnected(uint sourceLaneId, uint targetLaneId, bool sourceStartNode) {
