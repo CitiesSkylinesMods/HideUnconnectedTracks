@@ -1,13 +1,14 @@
 namespace HideUnconnectedTracks.LifeCycle
 {
-    using HideUnconnectedTracks.Utils; using KianCommons;
+    using HideUnconnectedTracks.Utils;
+    using KianCommons;
 
     public static class LifeCycle
     {
         public static void Load()
         {
             Log.Info("LifeCycle.Load() called");
-            TMPEUTILS.Init();
+            TMPEUtil.Init();
             NodeInfoLUT.GenerateLUTs();
             Log.Info("LifeCycle.Load() successful");
         }
@@ -16,7 +17,7 @@ namespace HideUnconnectedTracks.LifeCycle
         {
             Log.Info("LifeCycle.Release() called");
             NodeInfoLUT.LUT = null;
-            TMPEUTILS.Init();
+            TMPEUtil.Init();
         }
     }
 }

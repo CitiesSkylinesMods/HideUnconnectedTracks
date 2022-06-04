@@ -4,18 +4,82 @@ namespace HideUnconnectedTracks.Utils {
     using KianCommons;
     using static KianCommons.DCUtil;
     using static KianCommons.NetUtil;
+    using static HideUnconnectedTracks.Utils.TMPEUtil;
+    using TrafficManager.API.Traffic.Enums;
 
     public static class DirectConnectUtil {
-         /// <summary>
+        public static bool IsSegmentConnectedToSegment(
+            ushort sourceSegmentId,
+            ushort targetSegmentId,
+            ushort nodeId,
+            NetInfo.LaneType laneType,
+            VehicleInfo.VehicleType vehicleType) {
+            bool sourceStartNode = sourceSegmentId.ToSegment().IsStartNode(nodeId);
+            var sourceLaneInfos = sourceSegmentId.ToSegment().Info.m_lanes;
+            int nSource = sourceLaneInfos.Length;
+
+            uint sourceLaneId;
+            int sourceLaneIndex;
+            for (sourceLaneIndex = 0, sourceLaneId = sourceSegmentId.ToSegment().m_lanes;
+                sourceLaneIndex < nSource && sourceLaneId != 0;
+                ++sourceLaneIndex, sourceLaneId = sourceLaneId.ToLane().m_nextLane) {
+                //Log.Debug($"sourceLaneId={sourceLaneId} {sourceLaneInfos[sourceLaneIndex].m_laneType} & {laneType} = {sourceLaneInfos[sourceLaneIndex].m_laneType & laneType}\n" +
+                //    $"{sourceLaneInfos[sourceLaneIndex].m_vehicleType} & {vehicleType} = {sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType}");
+
+                if ((sourceLaneInfos[sourceLaneIndex].m_laneType & laneType) == 0 ||
+                    (sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType) == 0) {
+                    continue;
+                }
+
+                bool connected = IsLaneConnectedToSegment(sourceLaneId, targetSegmentId, sourceStartNode);
+                if (connected) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+
+        public static bool IsLaneConnectedToSegment(uint sourceLaneId, ushort targetSegmentID, bool startNode) {
+            foreach (var transition in GetForwardRoutings(sourceLaneId, startNode)) {
+                if (transition.type is LaneEndTransitionType.Invalid)
+                    continue;
+
+                if ((transition.group & LaneEndTransitionGroup.Track) == 0)
+                    continue;
+
+                if (transition.segmentId == targetSegmentID)
+                    return true;
+            }
+            return false;
+        }
+
+        public static bool IsLaneConnectedToLane(uint sourceLaneId, uint targetLaneId, bool startNode) {
+            foreach (var transition in GetForwardRoutings(sourceLaneId, startNode)) {
+                if (transition.type is LaneEndTransitionType.Invalid)
+                    continue;
+
+                if ((transition.group & LaneEndTransitionGroup.Track) == 0)
+                    continue;
+
+                if (transition.laneId == targetLaneId)
+                    return true;
+            }
+            return false;
+        }
+
+        static bool AreLanesConnected(
+            uint laneId1, bool startNode1,
+            uint laneId2, bool startNode2) {
+            return
+                IsLaneConnectedToLane(laneId1, laneId2, startNode1) ||
+                IsLaneConnectedToLane(laneId2, laneId1, startNode2);
+        }
+
+        /// <summary>
         /// Checks if any lanes from source segment can go to target segment.
         /// Precondition: assuming that the segments can have connected lanes.
         /// </summary>
-        /// <param name="sourceSegmentId"></param>
-        /// <param name="targetSegmentId"></param>
-        /// <param name="nodeId"></param>
-        /// <param name="laneType"></param>
-        /// <param name="vehicleType"></param>
-        /// <returns></returns>
         internal static bool HasDirectConnect(
             ushort segmentId1,
             ushort segmentId2,
@@ -56,89 +120,14 @@ namespace HideUnconnectedTracks.Utils {
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType) {
             try {
-                bool sourceStartNode = IsStartNode(sourceSegmentId, nodeId);
-                var sourceLaneInfos = sourceSegmentId.ToSegment().Info.m_lanes;
-                int nSource = sourceLaneInfos.Length;
-
-                var targetLaneInfos = targetSegmentId.ToSegment().Info.m_lanes;
-                int nTarget = targetLaneInfos.Length;
-
-                uint sourceLaneId, targetLaneId;
-                int sourceLaneIndex, targetLaneIndex;
-                for (sourceLaneIndex = 0, sourceLaneId = sourceSegmentId.ToSegment().m_lanes;
-                    sourceLaneIndex < nSource;
-                    ++sourceLaneIndex, sourceLaneId = sourceLaneId.ToLane().m_nextLane) {
-                    //Log.Debug($"sourceLaneId={sourceLaneId} {sourceLaneInfos[sourceLaneIndex].m_laneType} & {laneType} = {sourceLaneInfos[sourceLaneIndex].m_laneType & laneType}\n" +
-                    //    $"{sourceLaneInfos[sourceLaneIndex].m_vehicleType} & {vehicleType} = {sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType}");
-
-                    if ((sourceLaneInfos[sourceLaneIndex].m_laneType & laneType) == 0 ||
-                        (sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType) == 0) {
-                        continue;
-                    }
-                    //Log.Debug($"POINT A> ");
-                    for (targetLaneIndex = 0, targetLaneId = targetSegmentId.ToSegment().m_lanes;
-                        targetLaneIndex < nTarget;
-                        ++targetLaneIndex, targetLaneId = targetLaneId.ToLane().m_nextLane) {
-                        //Log.Debug($"targetLaneId={targetLaneId} {targetLaneInfos[targetLaneIndex].m_laneType} & {laneType} = {targetLaneInfos[targetLaneIndex].m_laneType & laneType}\n" +
-                        //    $"{targetLaneInfos[targetLaneIndex].m_vehicleType} & {vehicleType} = {targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType}");
-                        if ((targetLaneInfos[targetLaneIndex].m_laneType & laneType) == 0 ||
-                            (targetLaneInfos[targetLaneIndex].m_vehicleType & vehicleType) == 0) {
-                            continue;
-                        }
-
-                        bool connected = AreLanesConnected(
-                            sourceSegmentId, sourceLaneId, (byte)sourceLaneIndex,
-                            targetSegmentId, targetLaneId, (byte)targetLaneIndex,
-                            nodeId);
-
-                        //Log($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} connected={connected}");
-                        if (connected) {
-                            return true;
-                        }
-
-                    }
-                }
+                return
+                    IsSegmentConnectedToSegment(sourceSegmentId, targetSegmentId, nodeId, laneType, vehicleType) ||
+                    IsSegmentConnectedToSegment(targetSegmentId, sourceSegmentId, nodeId, laneType, vehicleType);
             } catch(Exception ex) { ex.Log(); }
             return false;
         }
 
-        static bool AreLanesConnected(
-            ushort segmentId1, uint laneId1, byte laneIndex1,
-            ushort segmentId2, uint laneId2, byte laneIndex2,
-            ushort nodeId) {
-            bool startNode1 = (bool)NetUtil.IsStartNode(segmentId1, nodeId);
-            bool startNode2 = (bool)NetUtil.IsStartNode(segmentId2, nodeId);
-            TMPEUTILS.GetLaneEndPoint(
-                segmentId1,
-                startNode1,
-                laneIndex1,
-                laneId1,
-                segmentId1.ToSegment().Info.m_lanes[laneIndex1],
-                out bool isSource1,
-                out bool isTarget1,
-                out _);
-            TMPEUTILS.GetLaneEndPoint(
-                segmentId2,
-                startNode2,
-                laneIndex2,
-                laneId2,
-                segmentId2.ToSegment().Info.m_lanes[laneIndex2],
-                out bool isSource2,
-                out bool isTarget2,
-                out _);
 
-            if ((isSource1 && isTarget2)) {
-                bool b1 = TMPEUTILS.HasConnections(laneId1, startNode1);
-                bool b2 = TMPEUTILS.AreLanesConnected(laneId1, laneId2, startNode1);
-                return !b1 || b2;
-            } else if (isTarget1 && isSource2) {
-                bool b1 = TMPEUTILS.HasConnections(laneId2, startNode2);
-                bool b2 = TMPEUTILS.AreLanesConnected(laneId2, laneId1, startNode2);
-                return !b1 || b2;
-            } else {
-                return false;
-            }
-        }
 
         [Flags]
         enum ConnectionT {
@@ -211,7 +200,7 @@ namespace HideUnconnectedTracks.Utils {
                 NetInfo targetInfo = targetSegment.Info;
                 //Log.Debug($"{nameof(DetermineDirectConnect)}(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
 
-                if (!TMPEUTILS.LCM.HasNodeConnections(nodeId))
+                if (!LCM.HasNodeConnections(nodeId))
                     return nodeInfo;
 
                 if (!NodeInfoLUT.LUT.ContainsKey(nodeInfo)) {
@@ -275,12 +264,11 @@ namespace HideUnconnectedTracks.Utils {
                         if (isTargetSingle)
                             otherTargetLane = targetLane;
                         else
-                            otherTargetLane = targetLanes_[j == 0 ? 1 : 0]; 
+                            otherTargetLane = targetLanes_[j == 0 ? 1 : 0];
 
                         bool connected = AreLanesConnected(
-                            sourceSegmentId, sourceLane.LaneID, (byte)sourceLane.LaneIndex,
-                            targetSegmentId, targetLane.LaneID, (byte)targetLane.LaneIndex,
-                            nodeId);
+                            sourceLane.LaneID, sourceStartNode,
+                            targetLane.LaneID, targetStartNode);
                         
                         //Log($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} connected={connected}");
                         if (connected) {

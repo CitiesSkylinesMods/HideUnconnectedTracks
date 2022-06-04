@@ -26,7 +26,7 @@ namespace HideUnconnectedTracks.Patches {
             ushort sourceSegmentID = nodeId.ToNode().GetSegment(data.m_dataInt0 & 7);
             int targetSegmentIDX = data.m_dataInt0 >> 4;
             ushort targetSegmentID = nodeId.ToNode().GetSegment(targetSegmentIDX);
-            if (TMPEUTILS.exists) {
+            if (TMPEUtil.Exists) {
                 try {
                     bool ret = DirectConnectUtil.DetermineDirectConnect(
                         sourceSegmentID,
@@ -43,8 +43,7 @@ namespace HideUnconnectedTracks.Patches {
                     return ret;
                 }
                 catch (Exception e) {
-                    Log.Error(e.Message);
-                    TMPEUTILS.exists = false;
+                    e.Log(false);
                     throw;
                 }
             }
