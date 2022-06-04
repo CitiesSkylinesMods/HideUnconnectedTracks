@@ -41,7 +41,9 @@ namespace HideUnconnectedTracks.Utils {
 
 
         public static bool IsLaneConnectedToSegment(uint sourceLaneId, ushort targetSegmentID, bool startNode) {
-            foreach (var transition in GetForwardRoutings(sourceLaneId, startNode)) {
+            var transitions = GetForwardRoutings(sourceLaneId, startNode);
+            if (transitions == null) return false;
+            foreach (var transition in transitions) {
                 if (transition.type is LaneEndTransitionType.Invalid)
                     continue;
 
@@ -55,7 +57,9 @@ namespace HideUnconnectedTracks.Utils {
         }
 
         public static bool IsLaneConnectedToLane(uint sourceLaneId, uint targetLaneId, bool startNode) {
-            foreach (var transition in GetForwardRoutings(sourceLaneId, startNode)) {
+            var transitions = GetForwardRoutings(sourceLaneId, startNode);
+            if (transitions == null) return false;
+            foreach (var transition in transitions) {
                 if (transition.type is LaneEndTransitionType.Invalid)
                     continue;
 
