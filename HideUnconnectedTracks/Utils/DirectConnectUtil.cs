@@ -6,6 +6,7 @@ namespace HideUnconnectedTracks.Utils {
     using static KianCommons.NetUtil;
     using static HideUnconnectedTracks.Utils.TMPEUtil;
     using TrafficManager.API.Traffic.Enums;
+    using TrafficManager.API.Manager;
 
     public static class DirectConnectUtil {
         public static bool IsSegmentConnectedToSegment(
@@ -24,15 +25,17 @@ namespace HideUnconnectedTracks.Utils {
             for (sourceLaneIndex = 0, sourceLaneId = sourceSegment.m_lanes;
                 sourceLaneIndex < nSource && sourceLaneId != 0;
                 ++sourceLaneIndex, sourceLaneId = sourceLaneId.ToLane().m_nextLane) {
-                //Log.Debug($"sourceLaneId={sourceLaneId} {sourceLaneInfos[sourceLaneIndex].m_laneType} & {laneType} = {sourceLaneInfos[sourceLaneIndex].m_laneType & laneType}\n" +
-                //    $"{sourceLaneInfos[sourceLaneIndex].m_vehicleType} & {vehicleType} = {sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType}");
+                NetInfo.Lane sourceLaneInfo = sourceLaneInfos[sourceLaneIndex];
+                if (Log.VERBOSE) Log.Debug(
+                    $"sourceLaneId={sourceLaneId} {sourceLaneInfo.m_laneType} & {laneType} = {sourceLaneInfo.m_laneType & laneType}\n" +
+                    $"{sourceLaneInfo.m_vehicleType} & {vehicleType} = {sourceLaneInfo.m_vehicleType & vehicleType}");
 
-                if ((sourceLaneInfos[sourceLaneIndex].m_laneType & laneType) == 0 ||
-                    (sourceLaneInfos[sourceLaneIndex].m_vehicleType & vehicleType) == 0) {
+                if (sourceLaneInfo.m_laneType.IsFlagSet(laneType)||
+                    sourceLaneInfo.m_vehicleType.IsFlagSet(vehicleType)) {
                     continue;
                 }
 
-                bool connected = IsLaneConnectedToSegment(sourceLaneId, targetSegmentId, sourceStartNode);
+                bool connected = IsLaneConnectedToSegment(sourceLaneId, sourceLaneInfo, targetSegmentId, sourceStartNode);
                 if (connected) {
                     return true;
                 }
@@ -41,44 +44,63 @@ namespace HideUnconnectedTracks.Utils {
         }
 
 
-        public static bool IsLaneConnectedToSegment(uint sourceLaneId, ushort targetSegmentID, bool startNode) {
+        public static bool IsLaneConnectedToSegment(uint sourceLaneId, NetInfo.Lane sourceLaneInfo, ushort targetSegmentID, bool startNode) {
             var transitions = GetForwardRoutings(sourceLaneId, startNode);
             if (transitions == null) return false;
-            foreach (var transition in transitions) {
+            bool sourceHasTrolley = sourceLaneInfo.HasTrolley();
+            var targetLaneInfos = targetSegmentID.ToSegment().Info.m_lanes;
+            foreach (LaneTransitionData transition in transitions) {
                 if (transition.type is LaneEndTransitionType.Invalid)
                     continue;
 
-                if ((transition.group & LaneEndTransitionGroup.Track) == 0)
+                if (transition.segmentId != targetSegmentID)
                     continue;
 
-                if (transition.segmentId == targetSegmentID)
-                    return true;
+                bool trackOrTrolly = (transition.group & LaneEndTransitionGroup.Track) != 0;
+                if (!trackOrTrolly) {
+                    trackOrTrolly =
+                        sourceHasTrolley &&
+                        targetLaneInfos[transition.laneIndex].HasTrolley();
+                }
+
+                if (trackOrTrolly) return true;
             }
+
             return false;
         }
 
-        public static bool IsLaneConnectedToLane(uint sourceLaneId, uint targetLaneId, bool startNode) {
-            var transitions = GetForwardRoutings(sourceLaneId, startNode);
+        static bool HasTrolley(this NetInfo.Lane laneInfo) => laneInfo.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Trolleybus);
+
+        public static bool IsLaneConnectedToLane(
+            uint sourceLaneId, NetInfo.Lane sourceLaneInfo, bool sourceStartNode,
+            uint targetLaneId, NetInfo.Lane targetLaneInfo) {
+            var transitions = GetForwardRoutings(sourceLaneId, sourceStartNode);
             if (transitions == null) return false;
+            bool trolly = sourceLaneInfo.HasTrolley() && targetLaneInfo.HasTrolley();
             foreach (var transition in transitions) {
                 if (transition.type is LaneEndTransitionType.Invalid)
                     continue;
 
-                if ((transition.group & LaneEndTransitionGroup.Track) == 0)
+                if (transition.laneId != targetLaneId)
                     continue;
 
-                if (transition.laneId == targetLaneId)
-                    return true;
+                bool trackOrTrolly = (transition.group & LaneEndTransitionGroup.Track) != 0 || trolly;
+
+                if(trackOrTrolly) return true;
             }
             return false;
         }
 
         static bool AreLanesConnected(
-            uint laneId1, bool startNode1,
-            uint laneId2, bool startNode2) {
+            uint laneId1, NetInfo.Lane laneInfo1, bool startNode1,
+            uint laneId2, NetInfo.Lane laneInfo2, bool startNode2) {
             return
-                IsLaneConnectedToLane(laneId1, laneId2, startNode1) ||
-                IsLaneConnectedToLane(laneId2, laneId1, startNode2);
+                IsLaneConnectedToLane(
+                    laneId1, laneInfo1, startNode1,
+                    laneId2, laneInfo2) ||
+                IsLaneConnectedToLane(
+                    laneId2, laneInfo2, startNode2,
+                    laneId1, laneInfo1);
         }
 
         /// <summary>
@@ -272,8 +294,8 @@ namespace HideUnconnectedTracks.Utils {
                             otherTargetLane = targetLanes_[j == 0 ? 1 : 0];
 
                         bool connected = AreLanesConnected(
-                            sourceLane.LaneID, sourceStartNode,
-                            targetLane.LaneID, targetStartNode);
+                            sourceLane.LaneID, sourceLane.LaneInfo, sourceStartNode,
+                            targetLane.LaneID, targetLane.LaneInfo, targetStartNode);
                         
                         //Log($"sourceLaneId={sourceLaneId} targetLaneId={targetLaneId} sourceStartNode={sourceStartNode} connected={connected}");
                         if (connected) {
