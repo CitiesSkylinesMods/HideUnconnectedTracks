@@ -14,13 +14,14 @@ namespace HideUnconnectedTracks.Utils {
             ushort nodeId,
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType) {
-            bool sourceStartNode = sourceSegmentId.ToSegment().IsStartNode(nodeId);
-            var sourceLaneInfos = sourceSegmentId.ToSegment().Info.m_lanes;
+            ref NetSegment sourceSegment = ref sourceSegmentId.ToSegment();
+            bool sourceStartNode = sourceSegment.IsStartNode(nodeId);
+            var sourceLaneInfos = sourceSegment.Info.m_lanes;
             int nSource = sourceLaneInfos.Length;
 
             uint sourceLaneId;
             int sourceLaneIndex;
-            for (sourceLaneIndex = 0, sourceLaneId = sourceSegmentId.ToSegment().m_lanes;
+            for (sourceLaneIndex = 0, sourceLaneId = sourceSegment.m_lanes;
                 sourceLaneIndex < nSource && sourceLaneId != 0;
                 ++sourceLaneIndex, sourceLaneId = sourceLaneId.ToLane().m_nextLane) {
                 //Log.Debug($"sourceLaneId={sourceLaneId} {sourceLaneInfos[sourceLaneIndex].m_laneType} & {laneType} = {sourceLaneInfos[sourceLaneIndex].m_laneType & laneType}\n" +

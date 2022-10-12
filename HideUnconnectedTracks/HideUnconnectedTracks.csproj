@@ -99,6 +99,7 @@
     <Compile Include="KianCommons\KianCommons\Plugins\PluginUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\Assertion.cs" />
     <Compile Include="KianCommons\KianCommons\Util\AuxilaryThread.cs" />
+    <Compile Include="KianCommons\KianCommons\Util\DelegateUtil.cs" />
     <Compile Include="KianCommons\KianCommons\Util\EnumBitMaskExtensions.cs" />
     <Compile Include="KianCommons\KianCommons\Util\EnumerationExtensions.cs" />
     <Compile Include="KianCommons\KianCommons\Util\GridUtil.cs" />
