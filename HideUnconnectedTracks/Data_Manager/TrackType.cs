@@ -10,7 +10,7 @@ namespace HideUnconnectedTracks {
         Metro,
         Monorail,
         Tram,
-        Trolly,
+        Trolley,
         All,
     }
 
@@ -20,10 +20,10 @@ namespace HideUnconnectedTracks {
                 case TrackType.Train: return TRAIN;
                 case TrackType.Metro: return METRO;
                 case TrackType.Monorail: return MONORAIL;
-                case TrackType.Trolly: return TROLLY;
+                case TrackType.Trolley: return TROLLEY;
                 case TrackType.Tram: return TRAM;
                 case TrackType.None: return NetInfo.ConnectGroup.None;
-                case TrackType.All: return TRAIN | METRO | MONORAIL | TROLLY | TRAM;
+                case TrackType.All: return TRAIN | METRO | MONORAIL | TROLLEY | TRAM;
                 default: throw new Exception("Unreachable code");
             }
         }
@@ -32,7 +32,7 @@ namespace HideUnconnectedTracks {
             if (connectGroup.IsFlagSet(TRAIN)) return TrackType.Train;
             if (connectGroup.IsFlagSet(METRO)) return TrackType.Metro;
             if (connectGroup.IsFlagSet(MONORAIL)) return TrackType.Monorail;
-            if (connectGroup.IsFlagSet(TROLLY)) return TrackType.Trolly;
+            if (connectGroup.IsFlagSet(TROLLEY)) return TrackType.Trolley;
             if (connectGroup.IsFlagSet(TRAM)) return TrackType.Tram;
             return TrackType.None;
         }
@@ -42,7 +42,7 @@ namespace HideUnconnectedTracks {
             if (connectGroup.IsFlagSet(TRAIN)) ret.Add(TrackType.Train);
             if (connectGroup.IsFlagSet(METRO)) ret.Add(TrackType.Metro);
             if (connectGroup.IsFlagSet(MONORAIL)) ret.Add(TrackType.Monorail);
-            if (connectGroup.IsFlagSet(TROLLY)) ret.Add(TrackType.Trolly);
+            if (connectGroup.IsFlagSet(TROLLEY)) ret.Add(TrackType.Trolley);
             if (connectGroup.IsFlagSet(TRAM)) ret.Add(TrackType.Tram);
             return ret;
         }

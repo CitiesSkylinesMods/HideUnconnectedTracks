@@ -50,8 +50,8 @@ namespace HideUnconnectedTracks.Patches {
             return true;
         }
 
-        static MethodInfo mShouldConnectTracks => typeof(CheckTracksCommons).GetMethod("ShouldConnectTracks") ?? throw new Exception("mShouldConnectTracks is null");
-        static MethodInfo mCheckRenderDistance => typeof(RenderManager.CameraInfo).GetMethod("CheckRenderDistance") ?? throw new Exception("mCheckRenderDistance is null");
+        static MethodInfo mShouldConnectTracks => typeof(CheckTracksCommons).GetMethod(nameof(ShouldConnectTracks), throwOnError: true);
+        static MethodInfo mCheckRenderDistance => typeof(RenderManager.CameraInfo).GetMethod("CheckRenderDistance", throwOnError: true);
         static FieldInfo fNodes => typeof(NetInfo).GetField("m_nodes") ?? throw new Exception("fNodes is null");
         static FieldInfo fDataVector0 => typeof(RenderManager.Instance).GetField(nameof(RenderManager.Instance.m_dataVector0)) ?? throw new Exception("fDataVector0 is null");
 

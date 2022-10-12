@@ -39,7 +39,7 @@ namespace HideUnconnectedTracks {
             catch (IOException) { } // file already exists
 
             List<string> families = new List<string>();
-            using (Stream fs1 = new FileStream("track-famlilies.txt", FileMode.OpenOrCreate, FileAccess.Read)) {
+            using (Stream fs1 = new FileStream(FamiliesPath, FileMode.OpenOrCreate, FileAccess.Read)) {
                 using (StreamReader reader = new StreamReader(fs1)) {
                     Log.Debug("filling in track-famlilies.txt");
                     while (reader.ReadLine() is string line)
