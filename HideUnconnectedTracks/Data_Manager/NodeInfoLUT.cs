@@ -167,7 +167,7 @@ namespace HideUnconnectedTracks {
                     Log.Info("Recycled half track meshes for station track: " + info.name, false);
             }
 
-            /// <returns>true if recycling was succesful.</returns>
+            /// <returns>true if recycling was successful.</returns>
             static bool Recycle(NetInfo info, NetInfo.Node nodeInfo) {
                 NodeInfoFamily cache = MeshLUT[nodeInfo.m_nodeMesh];
                 if (cache == null) return false;
