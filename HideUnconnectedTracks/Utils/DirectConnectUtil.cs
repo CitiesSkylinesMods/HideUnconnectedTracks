@@ -56,14 +56,13 @@ namespace HideUnconnectedTracks.Utils {
                 if (transition.segmentId != targetSegmentID)
                     continue;
 
-                bool trackOrTrolly = transition.HasTrack();
-                if (!trackOrTrolly) {
-                    trackOrTrolly =
-                        sourceHasTrolley &&
-                        targetLaneInfos[transition.laneIndex].HasTrolley();
-                }
+                // track or trolley:
+                if (transition.HasTrack())
+                    return true;
 
-                if (trackOrTrolly) return true;
+                if (sourceHasTrolley &&
+                    targetLaneInfos[transition.laneIndex].HasTrolley())
+                    return true;
             }
 
             return false;
@@ -85,9 +84,9 @@ namespace HideUnconnectedTracks.Utils {
                 if (transition.laneId != targetLaneId)
                     continue;
 
-                bool trackOrTrolly = transition.HasTrack() || trolly;
-
-                if(trackOrTrolly) return true;
+                // track or trolley:
+                if (transition.HasTrack() || trolly)
+                    return true;
             }
             return false;
         }
