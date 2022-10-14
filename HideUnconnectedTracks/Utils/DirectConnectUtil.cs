@@ -335,9 +335,10 @@ namespace HideUnconnectedTracks.Utils {
                 }
 
                 var table = NodeInfoLUT.LUT[nodeInfo];
-                //Log.Debug($"[P0] DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
-                //    $"nodeInfo.m_connectGroup={nodeInfo.m_connectGroup}\n =>" +
-                //    $"connections={connections} isTargetSingle={isTargetSingle}");
+                if(Log.VERBOSE)
+                    Log.Debug($"[P0] DetermineDirectConnect: nodeID={nodeId} sourceSegmentID={sourceSegmentId} targetSegmentID={targetSegmentId} " +
+                        $"nodeInfo.m_connectGroup={nodeInfo.m_connectGroup}\n =>" +
+                        $"connections={connections} isTargetSingle={isTargetSingle}");
 
                 if (isTargetSingle) {
                     switch (connections) {
