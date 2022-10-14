@@ -16,7 +16,7 @@ namespace HideUnconnectedTracks.LifeCycle
         public static void Release()
         {
             Log.Info("LifeCycle.Release() called");
-            NodeInfoLUT.LUT = null;
+            NodeInfoLUT.LUT.Clear();
             TMPEUtil.Init();
         }
     }

@@ -11,7 +11,7 @@ namespace HideUnconnectedTracks {
     using HideUnconnectedTracks.Utils;
 
     public static class NodeInfoLUT {
-        public static Hashtable LUT = new Hashtable();
+        public static Dictionary<NetInfo.Node, NodeInfoFamily> LUT = new (10000);
 
         public static readonly string[] BuiltInFamilies = new[] {
                 "Train Track,Train Oneway Track,Train Station Track",
@@ -23,7 +23,7 @@ namespace HideUnconnectedTracks {
         public static string FamiliesPath = "track-famlilies.txt";
 
         public static void GenerateLUTs() {
-            LUT = new Hashtable(10000);
+            LUT.Clear();
             MeshLUT = new MeshTable();
 
             PrefabFixesAndWorkArounds();
