@@ -56,7 +56,7 @@ namespace HideUnconnectedTracks.Utils {
                 if (transition.segmentId != targetSegmentID)
                     continue;
 
-                bool trackOrTrolly = (transition.group & LaneEndTransitionGroup.Track) != 0;
+                bool trackOrTrolly = transition.HasTrack();
                 if (!trackOrTrolly) {
                     trackOrTrolly =
                         sourceHasTrolley &&
@@ -70,6 +70,7 @@ namespace HideUnconnectedTracks.Utils {
         }
 
         static bool HasTrolley(this NetInfo.Lane laneInfo) => laneInfo.m_vehicleType.IsFlagSet(VehicleInfo.VehicleType.Trolleybus);
+        static bool HasTrack(this LaneTransitionData transition) => (transition.group & LaneEndTransitionGroup.Track) != 0;
 
         public static bool IsLaneConnectedToLane(
             uint sourceLaneId, NetInfo.Lane sourceLaneInfo, bool sourceStartNode,
@@ -84,7 +85,7 @@ namespace HideUnconnectedTracks.Utils {
                 if (transition.laneId != targetLaneId)
                     continue;
 
-                bool trackOrTrolly = (transition.group & LaneEndTransitionGroup.Track) != 0 || trolly;
+                bool trackOrTrolly = transition.HasTrack() || trolly;
 
                 if(trackOrTrolly) return true;
             }
