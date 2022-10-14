@@ -27,15 +27,16 @@ namespace HideUnconnectedTracks.Utils {
                 ++sourceLaneIndex, sourceLaneId = sourceLaneId.ToLane().m_nextLane) {
                 NetInfo.Lane sourceLaneInfo = sourceLaneInfos[sourceLaneIndex];
                 if (Log.VERBOSE) Log.Debug(
-                    $"sourceLaneId={sourceLaneId} {sourceLaneInfo.m_laneType} & {laneType} = {sourceLaneInfo.m_laneType & laneType}\n" +
+                    $"sourceLaneId={sourceLaneId}: " +
+                    $"{sourceLaneInfo.m_laneType} & {laneType} = {sourceLaneInfo.m_laneType & laneType}, " +
                     $"{sourceLaneInfo.m_vehicleType} & {vehicleType} = {sourceLaneInfo.m_vehicleType & vehicleType}");
 
-                if (sourceLaneInfo.m_laneType.IsFlagSet(laneType)||
-                    sourceLaneInfo.m_vehicleType.IsFlagSet(vehicleType)) {
-                    continue;
-                }
+                bool connected =
+                    sourceLaneInfo.m_laneType.IsFlagSet(laneType) ||
+                    sourceLaneInfo.m_vehicleType.IsFlagSet(vehicleType);
+                if (!connected) continue;
 
-                bool connected = IsLaneConnectedToSegment(sourceLaneId, sourceLaneInfo, targetSegmentId, sourceStartNode);
+                connected = IsLaneConnectedToSegment(sourceLaneId, sourceLaneInfo, targetSegmentId, sourceStartNode);
                 if (connected) {
                     return true;
                 }
@@ -146,6 +147,7 @@ namespace HideUnconnectedTracks.Utils {
             ushort nodeId,
             NetInfo.LaneType laneType,
             VehicleInfo.VehicleType vehicleType) {
+            if(Log.VERBOSE) Log.Called(sourceSegmentId, targetSegmentId, nodeId, laneType, vehicleType);
             try {
                 return
                     IsSegmentConnectedToSegment(sourceSegmentId, targetSegmentId, nodeId, laneType, vehicleType) ||
@@ -225,13 +227,14 @@ namespace HideUnconnectedTracks.Utils {
                 ref NetSegment targetSegment = ref targetSegmentId.ToSegment();
                 NetInfo sourceInfo = sourceSegment.Info;
                 NetInfo targetInfo = targetSegment.Info;
-                //Log.Debug($"{nameof(DetermineDirectConnect)}(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
+                //Log.VERBOSE = true;
+                if(Log.VERBOSE) Log.Debug($"{nameof(DetermineDirectConnect)}(source:{sourceSegmentId} target:{targetSegmentId} node:{nodeId}) called");
 
                 if (!LCM.HasNodeConnections(nodeId))
                     return nodeInfo;
 
                 if (!NodeInfoLUT.LUT.ContainsKey(nodeInfo)) {
-                    Log.Debug("[P1]");
+                    if(Log.VERBOSE) Log.Debug("!NodeInfoLUT.LUT.ContainsKey(nodeInfo)");
                     bool res = HasDirectConnect(
                         sourceSegmentId,
                         targetSegmentId,
